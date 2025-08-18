@@ -9,11 +9,12 @@ module.exports = {
 		"prettier",
 	],
 
+	parser: "@typescript-eslint/parser",
 	parserOptions: { tsconfigRootDir: __dirname, project: "./tsconfig.eslint.json" },
 
 	env: { es2021: true, node: true, "jest/globals": true },
 
-	plugins: ["jest"],
+	plugins: ["jest", "@typescript-eslint/eslint-plugin"],
 
 	ignorePatterns: [
 		"node_modules",
@@ -152,7 +153,10 @@ module.exports = {
 				"@typescript-eslint/unbound-method": "off",
 
 				// force explicit member accessibility modifiers
-				"@typescript-eslint/explicit-member-accessibility": ["error", { accessibility: "no-public" }],
+				"@typescript-eslint/explicit-member-accessibility": [
+					"error",
+					{ accessibility: "no-public" },
+				],
 
 				// enforce return types on module boundaries
 				"@typescript-eslint/explicit-module-boundary-types": "error",
@@ -190,7 +194,7 @@ module.exports = {
 				// allow dev dependencies
 				"import/no-extraneous-dependencies": [
 					"error",
-					{ devDependencies: true, optionalDependencies: false, peerDependencies: false },
+					{ devDependencies: true, optionalDependencies: false, peerDependencies: true },
 				],
 
 				// disallow use of "it" for test blocks
@@ -223,7 +227,7 @@ module.exports = {
 				// prefer called with
 				"jest/prefer-called-with": "error",
 
-				"jest/no-conditional-expect": "off"
+				"jest/no-conditional-expect": "off",
 			},
 		},
 
@@ -263,7 +267,7 @@ module.exports = {
 				"lines-between-class-members": "off",
 				"@typescript-eslint/lines-between-class-members": "off",
 				"@typescript-eslint/member-ordering": "off",
-				"@typescript-eslint/ban-types": "off"
+				"@typescript-eslint/ban-types": "off",
 			},
 		},
 	],

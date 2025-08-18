@@ -27,10 +27,10 @@ import { Errors } from "moleculer";
  *  }
  */
 const brokerConfig: BrokerOptions = {
-	// Namespace of nodes to segment your nodes on the same network.
-	namespace: "",
-	// Unique node identifier. Must be unique in a namespace.
-	nodeID: null,
+	// Namespace of nodes to segment your nodes on the network.
+	namespace: process.env.NAMESPACE || "moleculer-project",
+	// Unique node identifier. Must be unique in a namespace on the same machine.
+	nodeID: process.env.NODEID || `node-${process.pid}`,
 	// Custom metadata store. Store here what you want. Accessing: `this.broker.metadata`
 	metadata: {},
 
@@ -59,11 +59,11 @@ const brokerConfig: BrokerOptions = {
 	// More info: https://moleculer.services/docs/0.14/networking.html
 	// Note: During the development, you don't need to define it because all services will be loaded locally.
 	// In production you can set it via `TRANSPORTER=nats://localhost:4222` environment variable.
-	transporter: null, // "NATS"
+	transporter: process.env.NATS_URL, // "NATS"
 
 	// Define a cacher.
 	// More info: https://moleculer.services/docs/0.14/caching.html
-    cacher: "Memory",
+	cacher: "Memory",
 
 	// Define a serializer.
 	// Available values: "JSON", "Avro", "ProtoBuf", "MsgPack", "Notepack", "Thrift".
@@ -150,7 +150,7 @@ const brokerConfig: BrokerOptions = {
 	// Enable action & event parameter validation. More info: https://moleculer.services/docs/0.14/validating.html
 	validator: true,
 
-	errorHandler: null,
+	errorHandler: undefined,
 
 	// Enable/disable built-in metrics function. More info: https://moleculer.services/docs/0.14/metrics.html
 	metrics: {
@@ -205,7 +205,6 @@ const brokerConfig: BrokerOptions = {
 
 	// Called after broker stopped.
 	// async stopped(broker: ServiceBroker): Promise<void> {},
-
 };
 
 export = brokerConfig;
