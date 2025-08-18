@@ -33,9 +33,44 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-
+git
 
 # Lock Files
 *lock.json
 *lock.yaml
 *.lock
+
+# Additional service-level ignores (merged from services/auth-service/.gitignore)
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Instrumented libs
+lib-cov
+
+# Build / package tooling leftovers
+.grunt
+bower_components
+.lock-wscript
+build/Release
+jspm_packages/
+
+# Caches and history
+.npm
+.eslintcache
+.node_repl_history
+
+# Package artifacts
+*.tgz
+
+# Yarn integrity file
+.yarn-integrity
+
+# Environment files
+.env
+
+# Framework outputs
+.next
+
