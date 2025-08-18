@@ -1,0 +1,33 @@
+import * as os from 'os';
+import { Module } from '@nestjs/common';
+import { AuthController } from './auth.controller';
+import { ServiceBroker } from 'moleculer';
+import { SERVICE_AUTH } from '../utils/moleculer/moleculer.constants';
+import { ConfigService } from '@nestjs/config';
+import { EnvConfig } from '../utils/config.schema';
+// import { MoleculerAdapter } from '../moleculer/adapter';
+
+@Module({
+  imports: [],
+  controllers: [AuthController],
+  providers: [
+    {
+      provide: SERVICE_AUTH,
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService<EnvConfig>) => {
+        const broker = new ServiceBroker({
+          nodeID: `${configService.get('NODE_ID_PREFIX')}-${os.hostname().toLowerCase()}-${process.pid}`,
+          namespace: configService.get('NAMESPACE'),
+          transporter: {
+            type: 'NATS',
+            options: { url: configService.get('NATS_URL') },
+          },
+          // Add other options from your brokerConfig if needed
+        });
+        await broker.start();
+        return broker;
+      },
+    },
+  ],
+})
+export class AuthModule {}

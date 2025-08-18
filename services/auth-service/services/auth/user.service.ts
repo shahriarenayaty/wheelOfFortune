@@ -1,0 +1,103 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import type { Context, ServiceBroker } from "moleculer";
+import { Service } from "moleculer";
+import DbService from "moleculer-db";
+import MongooseDbAdapter from "moleculer-db-adapter-mongoose";
+import { v4 as uuid } from "uuid";
+import { userModel } from "../../models/user";
+import type { IUser, UserDocument } from "../../models/user/schema";
+import { loginValidator, registerValidator } from "./auth.validators";
+import { LoginUseCase, type LoginUseCaseParams } from "./use-cases/login.usecase";
+import { UserRepository } from "./auth.repository";
+import { RegisterUseCase, RegisterUseCaseParams } from "./use-cases/register.usecase";
+const { MoleculerClientError } = require("moleculer").Errors;
+
+export default class AuthService extends Service {
+	// Adapter for the moleculer-db mixin
+	private adapter: MongooseDbAdapter<UserDocument> = new MongooseDbAdapter(
+		process.env.MONGO_URI!,
+	);
+
+	private userRepository!: UserRepository;
+	private jwtSecret!: string;
+
+	constructor(broker: ServiceBroker) {
+		super(broker);
+
+		this.parseServiceSchema({
+			name: "auth",
+			// Use the DbService mixin
+			mixins: [DbService],
+			adapter: this.adapter,
+			model: userModel,
+
+			// Service-specific settings
+
+			settings: {
+				// Exclude the password field from default responses
+				// effectively hiding sensitive data like the user's password
+				fields: ["_id", "phone", "referralCode"],
+			},
+
+			/**
+			 * The 'created' hook is called when the service instance is created.
+			 * It's the perfect place to initialize objects that the service will need throughout its lifetime.
+			 */
+			created: () => {
+				// Now, the repository is created only ONCE per service instance.
+				this.userRepository = new UserRepository(this.adapter);
+			},
+
+			/**
+			 * The 'started' hook is called after the service has been started.
+			 * It's a great place to validate configuration and environment variables.
+			 */
+			started: async () => {
+				const secret = process.env.JWT_SECRET;
+				if (!secret) {
+					// This will stop the service from starting if the secret is missing.
+					throw new MoleculerClientError(
+						"JWT_SECRET environment variable is not defined.",
+						500, // Use 500 for server configuration errors
+						"JWT_SECRET_NOT_DEFINED",
+					);
+				}
+				this.jwtSecret = secret;
+			},
+
+			// Service actions
+			actions: {
+				register: {
+					params: registerValidator,
+					handler: async (
+						ctx: Context<RegisterUseCaseParams>,
+					): Promise<{ token: string; referralCode: string }> => {
+						const useCase = new RegisterUseCase({
+							userRepository: this.userRepository,
+							jwtSecret: this.jwtSecret,
+						});
+
+						const result = await useCase.execute(ctx.params);
+						//TODO: Emit user.registered event
+						// this.broker.emit("user.registered", { userId: result.userId });
+						return result;
+					},
+				},
+
+				login: {
+					params: loginValidator,
+					async handler(ctx: Context<LoginUseCaseParams>): Promise<{ token: string }> {
+						const useCase = new LoginUseCase({
+							userRepository: this.userRepository,
+							jwtSecret: this.jwtSecret,
+						});
+
+						// 2. Execute the use case with the validated parameters
+						return useCase.execute(ctx.params);
+					},
+				},
+			},
+		});
+	}
+}

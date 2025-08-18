@@ -1,5 +1,11 @@
+import os from "os";
 import type { BrokerOptions, MetricRegistry, ServiceBroker } from "moleculer";
 import { Errors } from "moleculer";
+import { validateEnv } from "./utils/config.schema";
+import errorHandlerMiddleware from "./utils/errorHandler.middleware";
+
+// Validate environment variables
+validateEnv(process.env);
 
 /**
  * Moleculer ServiceBroker configuration file
@@ -28,9 +34,9 @@ import { Errors } from "moleculer";
  */
 const brokerConfig: BrokerOptions = {
 	// Namespace of nodes to segment your nodes on the network.
-	namespace: process.env.NAMESPACE || "moleculer-project",
+	namespace: process.env.NAMESPACE,
 	// Unique node identifier. Must be unique in a namespace on the same machine.
-	nodeID: process.env.NODEID || `node-${process.pid}`,
+	nodeID: `${process.env.NODE_ID_PREFIX}-${os.hostname().toLowerCase()}-${process.pid}`,
 	// Custom metadata store. Store here what you want. Accessing: `this.broker.metadata`
 	metadata: {},
 
@@ -59,7 +65,13 @@ const brokerConfig: BrokerOptions = {
 	// More info: https://moleculer.services/docs/0.14/networking.html
 	// Note: During the development, you don't need to define it because all services will be loaded locally.
 	// In production you can set it via `TRANSPORTER=nats://localhost:4222` environment variable.
-	transporter: process.env.NATS_URL, // "NATS"
+	// transporter: process.env.NATS_URL, // "NATS"
+	transporter: {
+		type: "NATS",
+		options: {
+			url: process.env.NATS_URL || "nats://localhost:4222", // Make sure this matches your NestJS config
+		},
+	},
 
 	// Define a cacher.
 	// More info: https://moleculer.services/docs/0.14/caching.html
@@ -154,7 +166,7 @@ const brokerConfig: BrokerOptions = {
 
 	// Enable/disable built-in metrics function. More info: https://moleculer.services/docs/0.14/metrics.html
 	metrics: {
-		enabled: true,
+		enabled: false,
 		// Available built-in reporters: "Console", "CSV", "Event", "Prometheus", "Datadog", "StatsD"
 		reporter: {
 			type: "Console",
@@ -192,16 +204,42 @@ const brokerConfig: BrokerOptions = {
 	},
 
 	// Register custom middlewares
-	middlewares: [],
-
-	// Register custom REPL commands.
-	replCommands: null,
+	middlewares: [errorHandlerMiddleware],
 
 	// Called after broker created.
-	// created(broker: ServiceBroker): void {},
+	created(broker: ServiceBroker) {
+		// broker.loadService("path/to/your/service.file");
+	},
 
 	// Called after broker started.
-	// async started(broker: ServiceBroker): Promise<void> {},
+	async started(broker: ServiceBroker): Promise<void> {
+		const natsUrl = process.env.NATS_URL || "nats://localhost:4222";
+		broker.logger.info(`🚀 Broker started. Transporter: NATS (${natsUrl})`);
+		try {
+			const actions: unknown = await broker.call("$node.actions", { onlyLocal: true });
+			if (Array.isArray(actions)) {
+				(actions as { name?: string }[]).forEach((a) => {
+					if (a?.name) {
+						broker.logger.info(`🔊 Listening action: ${a.name} on ${natsUrl}`);
+					}
+				});
+			}
+		} catch (err) {
+			broker.logger.warn("Could not list actions", err instanceof Error ? err.message : err);
+		}
+		try {
+			const events: unknown = await broker.call("$node.events", { onlyLocal: true });
+			if (Array.isArray(events)) {
+				(events as { name?: string }[]).forEach((e) => {
+					if (e?.name) {
+						broker.logger.info(`📢 Subscribed event: ${e.name} on ${natsUrl}`);
+					}
+				});
+			}
+		} catch (err) {
+			broker.logger.warn("Could not list events", err instanceof Error ? err.message : err);
+		}
+	},
 
 	// Called after broker stopped.
 	// async stopped(broker: ServiceBroker): Promise<void> {},
