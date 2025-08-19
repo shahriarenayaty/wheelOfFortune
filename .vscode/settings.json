@@ -1,0 +1,6 @@
+{
+  // In a monorepo, this setting tells the VS Code ESLint extension to run a separate
+  // process for each service folder. This ensures that ESLint uses the correct
+  // package.json for each service, resolving 'import/no-extraneous-dependencies' errors.
+  "eslint.workingDirectories": [{ "pattern": "./services/*/" }]
+}

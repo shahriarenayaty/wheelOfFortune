@@ -140,6 +140,11 @@ module.exports = {
 		// overrides @typescript-eslint/recommended -- '@typescript-eslint/no-unused-vars': 'warn'
 		// https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/src/configs/recommended.ts
 		"@typescript-eslint/no-unused-vars": "warn",
+
+		"import/no-extraneous-dependencies": [
+			"error",
+			{ devDependencies: true, optionalDependencies: false, peerDependencies: true },
+		],
 	},
 
 	overrides: [

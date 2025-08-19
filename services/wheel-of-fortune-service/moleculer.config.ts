@@ -1,5 +1,5 @@
 import os from "os";
-import type { BrokerOptions, MetricRegistry, ServiceBroker } from "moleculer";
+import type { BrokerOptions } from "moleculer";
 import { Errors } from "moleculer";
 import errorHandlerMiddleware from "./src/common/middlewares/errorHandler.middleware";
 import { config } from "./src/config";
