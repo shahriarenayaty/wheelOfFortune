@@ -6,6 +6,7 @@ import { userModel } from "../../models/user";
 import type { UserDocument } from "../../models/user/schema";
 import { UserRepository } from "./auth.repository";
 import { loginValidator, registerValidator } from "./auth.validators";
+import { GamificationGateway } from "./gamification.gateway";
 import { LoginUseCase, type LoginUseCaseParams } from "./use-cases/login.usecase";
 import { RegisterUseCase, type RegisterUseCaseParams } from "./use-cases/register.usecase";
 
@@ -20,6 +21,8 @@ export default class AuthService extends Service {
 	private userRepository!: UserRepository;
 
 	private jwtSecret!: string;
+
+	private gamificationGateway!: GamificationGateway;
 
 	constructor(broker: ServiceBroker) {
 		super(broker);
@@ -46,6 +49,7 @@ export default class AuthService extends Service {
 			created: () => {
 				// Now, the repository is created only ONCE per service instance.
 				this.userRepository = new UserRepository(this.adapter);
+				this.gamificationGateway = new GamificationGateway(this.broker);
 			},
 
 			/**
@@ -74,16 +78,11 @@ export default class AuthService extends Service {
 					): Promise<{ token: string; referralCode: string }> => {
 						const useCase = new RegisterUseCase({
 							userRepository: this.userRepository,
+							gamificationGateway: this.gamificationGateway,
 							jwtSecret: this.jwtSecret,
 						});
 
-						const result = await useCase.execute(ctx.params);
-
-						// TODO: Emit user.registered event
-
-						// this.broker.emit("user.registered", { userId: result.userId });
-
-						return result;
+						return useCase.execute(ctx.params);
 					},
 				},
 

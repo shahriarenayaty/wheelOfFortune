@@ -1,10 +1,11 @@
 import { ServiceBroker } from "moleculer";
 import { IGamificationRepository } from "../gamification.repository";
+import { IAuthGateway } from "../auth.gateway";
 const { MoleculerClientError } = require("moleculer").Errors;
 
 export interface RedeemReferralUseCaseDependencies {
 	gamificationRepository: IGamificationRepository;
-	broker: ServiceBroker;
+	authGateway: IAuthGateway;
 }
 
 export interface RedeemReferralUseCaseParams {
@@ -16,7 +17,7 @@ export class RedeemReferralUseCase {
 	constructor(private dependencies: RedeemReferralUseCaseDependencies) {}
 
 	public async execute(params: RedeemReferralUseCaseParams): Promise<{ success: boolean }> {
-		const { gamificationRepository, broker } = this.dependencies;
+		const { gamificationRepository, authGateway } = this.dependencies;
 		const { userId, code } = params;
 
 		// 1. Check if the user has already redeemed a code
@@ -30,14 +31,11 @@ export class RedeemReferralUseCase {
 		}
 
 		// 2. Find the owner of the referral code by calling the auth service
-		const owners: Array<{ _id: string; referralCode: string }> = await broker.call("auth.find", {
-			query: { referralCode: code },
-		});
+		const owner = await authGateway.findUserByReferralCode(params.code);
 
-		if (!owners || owners.length === 0) {
-			throw new MoleculerClientError("Invalid referral code.", 404, "INVALID_CODE");
+		if (!owner) {
+			throw new MoleculerClientError("Invalid referral code.", 404, "INVALID_REFERRAL_CODE");
 		}
-		const owner = owners[0];
 
 		// 3. A user cannot redeem their own code
 		if (owner._id.toString() === userId) {

@@ -10,6 +10,9 @@ const ERROR_MESSAGE_MAP: Record<string, string> = {
   INVALID_PASSWORD: 'The password you entered is incorrect.',
   PHONE_EXISTS:
     'The phone number you entered is already associated with an account.',
+  ALREADY_REDEEMED: 'This referral code has already been redeemed.',
+  INVALID_REFERRAL_CODE: 'The referral code you entered is invalid.',
+  SELF_REDEMPTION: 'You cannot redeem your own referral code.',
 };
 
 export { ERROR_MESSAGE_MAP };

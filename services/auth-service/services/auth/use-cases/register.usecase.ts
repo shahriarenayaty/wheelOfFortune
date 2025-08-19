@@ -4,12 +4,14 @@ import { Errors } from "moleculer";
 import { v4 as uuid } from "uuid";
 import type { UserDocument } from "../../../models/user/schema";
 import type { IUserRepository } from "../auth.repository";
+import { type IGamificationGateway } from "../gamification.gateway";
 
 const { MoleculerClientError } = Errors;
 
 // Define the dependencies this use case needs
 export interface RegisterUseCaseDependencies {
 	userRepository: IUserRepository;
+	gamificationGateway: IGamificationGateway;
 	jwtSecret: string; // The secret key for signing tokens
 }
 
@@ -60,7 +62,10 @@ export class RegisterUseCase {
 			{ expiresIn: "1h" }, // Options
 		);
 
-		// 5. Return the token
+		// 5. Notify the gamification service and reward the user
+		await this.dependencies.gamificationGateway.notifyUserRegistered(user._id.toString());
+
+		// 6. Return the token
 		return { token, referralCode, userId: user._id.toString() };
 	}
 }

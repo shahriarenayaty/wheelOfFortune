@@ -22,7 +22,7 @@ export class UserRepository implements IUserRepository {
 
 	async create(data: Partial<IUser>): Promise<UserDocument> {
 		// const user = new this.adapter(data);
-        
+
 		const user = await this.adapter.insert(data as IUser);
 		return user;
 	}

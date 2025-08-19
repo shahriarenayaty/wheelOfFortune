@@ -6,11 +6,13 @@ import { RedeemReferralUseCase } from "./use-cases/redeem-referral.usecase";
 import { redeemReferralValidator } from "./gamification.validators";
 import { pointModel } from "../../models/points";
 import { redeemedReferralModel } from "../../models/redeemed-referral";
+import { AuthGateway } from "./auth.gateway";
 
 const { MoleculerClientError } = require("moleculer").Errors;
 
 export default class GamificationService extends Service {
 	private gamificationRepository!: IGamificationRepository;
+	private authGateway!: AuthGateway;
 
 	constructor(broker: ServiceBroker) {
 		super(broker);
@@ -61,7 +63,7 @@ export default class GamificationService extends Service {
 		this.verifyAuth(ctx);
 		const useCase = new RedeemReferralUseCase({
 			gamificationRepository: this.gamificationRepository,
-			broker: this.broker,
+			authGateway: this.authGateway,
 		});
 		return useCase.execute({ userId: ctx.meta.user.userId, code: ctx.params.code });
 	}
@@ -100,6 +102,7 @@ export default class GamificationService extends Service {
 		// This hook is called when the service instance is created.
 		// It's the perfect place to initialize objects that the service will need throughout its lifetime.
 		this.gamificationRepository = new GamificationRepository(pointModel, redeemedReferralModel);
+		this.authGateway = new AuthGateway(this.broker);
 	}
 
 	private async onServiceStarted() {
