@@ -3,7 +3,8 @@ import jwt from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
 import type { UserDocument } from "../../../models/user/schema";
 import type { IUserRepository } from "../auth.repository";
-const { MoleculerClientError } = require("moleculer").Errors;
+import { Errors } from "moleculer";
+const { MoleculerClientError } = Errors;
 
 // Define the dependencies this use case needs
 export interface RegisterUseCaseDependencies {

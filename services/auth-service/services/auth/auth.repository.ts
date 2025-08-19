@@ -1,5 +1,4 @@
 import type MongooseDbAdapter from "moleculer-db-adapter-mongoose";
-import type { userModel } from "../../models/user";
 import type { IUser, UserDocument } from "../../models/user/schema";
 
 export interface IUserRepository {
