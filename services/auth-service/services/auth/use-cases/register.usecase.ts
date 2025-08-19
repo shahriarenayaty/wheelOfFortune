@@ -1,9 +1,10 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { Errors } from "moleculer";
 import { v4 as uuid } from "uuid";
 import type { UserDocument } from "../../../models/user/schema";
 import type { IUserRepository } from "../auth.repository";
-import { Errors } from "moleculer";
+
 const { MoleculerClientError } = Errors;
 
 // Define the dependencies this use case needs
@@ -49,7 +50,7 @@ export class RegisterUseCase {
 		const user: UserDocument = await userRepository.create({
 			phone,
 			password: hashedPassword,
-			referralCode: referralCode,
+			referralCode,
 		});
 
 		// 4. Generate a JWT
@@ -60,6 +61,6 @@ export class RegisterUseCase {
 		);
 
 		// 5. Return the token
-		return { token, referralCode: referralCode, userId: user._id.toString() };
+		return { token, referralCode, userId: user._id.toString() };
 	}
 }

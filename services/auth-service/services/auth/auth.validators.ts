@@ -1,4 +1,4 @@
-import { RuleString } from "fastest-validator";
+import type { RuleString } from "fastest-validator";
 
 // This example looks for 10 to 15 digits, optionally starting with a +.
 const phonePattern = /^\+?[0-9]{10,15}$/;

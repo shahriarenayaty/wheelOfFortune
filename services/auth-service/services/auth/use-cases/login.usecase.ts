@@ -1,10 +1,10 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { Errors } from "moleculer";
 import type { UserDocument } from "../../../models/user/schema";
 import type { IUserRepository } from "../auth.repository";
-import { Errors } from "moleculer";
-const { MoleculerClientError } = Errors;
 
+const { MoleculerClientError } = Errors;
 
 // Define the dependencies this use case needs
 export interface LoginUseCaseDependencies {
