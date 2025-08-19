@@ -1,25 +1,24 @@
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import type { Context, ServiceBroker } from "moleculer";
-import { Service } from "moleculer";
+import { Errors, Service } from "moleculer";
 import DbService from "moleculer-db";
 import MongooseDbAdapter from "moleculer-db-adapter-mongoose";
-import { v4 as uuid } from "uuid";
 import { userModel } from "../../models/user";
-import type { IUser, UserDocument } from "../../models/user/schema";
+import type { UserDocument } from "../../models/user/schema";
+import { UserRepository } from "./auth.repository";
 import { loginValidator, registerValidator } from "./auth.validators";
 import { LoginUseCase, type LoginUseCaseParams } from "./use-cases/login.usecase";
-import { UserRepository } from "./auth.repository";
-import { RegisterUseCase, RegisterUseCaseParams } from "./use-cases/register.usecase";
-const { MoleculerClientError } = require("moleculer").Errors;
+import { RegisterUseCase, type RegisterUseCaseParams } from "./use-cases/register.usecase";
+
+const { MoleculerClientError } = Errors;
 
 export default class AuthService extends Service {
 	// Adapter for the moleculer-db mixin
 	private adapter: MongooseDbAdapter<UserDocument> = new MongooseDbAdapter(
-		process.env.MONGO_URI!,
+		process.env.MONGO_URI || "mongodb://localhost:27017/wheelOfFortune",
 	);
 
 	private userRepository!: UserRepository;
+
 	private jwtSecret!: string;
 
 	constructor(broker: ServiceBroker) {
@@ -53,7 +52,7 @@ export default class AuthService extends Service {
 			 * The 'started' hook is called after the service has been started.
 			 * It's a great place to validate configuration and environment variables.
 			 */
-			started: async () => {
+			started: () => {
 				const secret = process.env.JWT_SECRET;
 				if (!secret) {
 					// This will stop the service from starting if the secret is missing.
@@ -79,8 +78,11 @@ export default class AuthService extends Service {
 						});
 
 						const result = await useCase.execute(ctx.params);
-						//TODO: Emit user.registered event
+
+						// TODO: Emit user.registered event
+
 						// this.broker.emit("user.registered", { userId: result.userId });
+
 						return result;
 					},
 				},

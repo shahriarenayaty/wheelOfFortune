@@ -106,7 +106,7 @@ module.exports = {
 				format: null,
 			},
 			// allow variables to be camelCase or UPPER_CASE
-			{ selector: "variable", format: ["camelCase", "UPPER_CASE"] },
+			{ selector: "variable", format: ["camelCase", "UPPER_CASE", "PascalCase"] },
 			// allow known variable exclusions
 			{
 				selector: "variable",
