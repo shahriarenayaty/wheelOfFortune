@@ -126,6 +126,11 @@ module.exports = {
 				selector: ["typeLike"],
 				format: ["PascalCase"],
 			},
+			// UPPER_CASE for enums members
+			{
+				selector: "enumMember",
+				format: ["UPPER_CASE"],
+			},
 		],
 
 		// disallow parameter properties in favor of explicit class declarations

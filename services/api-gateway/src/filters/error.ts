@@ -13,6 +13,10 @@ const ERROR_MESSAGE_MAP: Record<string, string> = {
   ALREADY_REDEEMED: 'This referral code has already been redeemed.',
   INVALID_REFERRAL_CODE: 'The referral code you entered is invalid.',
   SELF_REDEMPTION: 'You cannot redeem your own referral code.',
+  ORDER_NOT_FOUND: 'The order you are looking for could not be found.',
+  FORBIDDEN_ORDER: 'You do not have permission to access this order.',
+  ORDER_PROCESSED: 'The order has already been processed.',
+  UNAUTHORIZED: 'You are not authorized to perform this action.',
 };
 
 export { ERROR_MESSAGE_MAP };

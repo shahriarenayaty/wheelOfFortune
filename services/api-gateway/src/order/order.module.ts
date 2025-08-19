@@ -1,20 +1,19 @@
 import * as os from 'os';
 import { Module } from '@nestjs/common';
 import { ServiceBroker } from 'moleculer';
-import { SERVICE_GAMIFICATION } from '../utils/moleculer/moleculer.constants';
+import { SERVICE_ORDER } from '../utils/moleculer/moleculer.constants';
 import { ConfigService } from '@nestjs/config';
 import { EnvConfig } from '../utils/config.schema';
-import { ReferralsController } from './referrals.controller';
 import { JwtStrategy } from '../auth/jwt.strategy';
-// import { MoleculerAdapter } from '../moleculer/adapter';
+import { OrderController } from './order.controller';
 
 @Module({
   imports: [],
-  controllers: [ReferralsController],
+  controllers: [OrderController],
   providers: [
     JwtStrategy,
     {
-      provide: SERVICE_GAMIFICATION,
+      provide: SERVICE_ORDER,
       inject: [ConfigService],
       useFactory: async (configService: ConfigService<EnvConfig>) => {
         const randomNumber = Math.floor(Math.random() * 10000);
@@ -33,4 +32,4 @@ import { JwtStrategy } from '../auth/jwt.strategy';
     },
   ],
 })
-export class ReferralsModule {}
+export class OrderModule {}

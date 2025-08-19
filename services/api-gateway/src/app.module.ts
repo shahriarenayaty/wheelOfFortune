@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 // import { configValidationSchema } from './utils/config.schema';
 import { validateSchema } from './utils/config.schema';
 import { ReferralsModule } from './referrals/referrals.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ReferralsModule } from './referrals/referrals.module';
     }),
     AuthModule,
     ReferralsModule,
+    OrderModule,
   ],
   controllers: [],
   providers: [],

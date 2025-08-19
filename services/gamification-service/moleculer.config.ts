@@ -36,7 +36,9 @@ const brokerConfig: BrokerOptions = {
 	// Namespace of nodes to segment your nodes on the same network.
 	namespace: process.env.NAMESPACE,
 	// Unique node identifier. Must be unique in a namespace.
-	nodeID: `${process.env.NODE_ID_PREFIX}-${os.hostname().toLowerCase()}-${process.pid}`,
+	nodeID: `${process.env.NODE_ID_PREFIX}-${os.hostname().toLowerCase()}-${
+		process.pid
+	}-${Math.floor(Math.random() * 10000)}`,
 	// Custom metadata store. Store here what you want. Accessing: `this.broker.metadata`
 	metadata: {},
 

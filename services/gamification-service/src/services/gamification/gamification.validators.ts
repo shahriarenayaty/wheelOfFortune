@@ -1,4 +1,4 @@
-import { RuleString } from "fastest-validator";
+import { RuleString, RuleNumber } from "fastest-validator";
 
 export const redeemReferralValidator = {
 	code: {
@@ -7,5 +7,13 @@ export const redeemReferralValidator = {
 		max: 10,
 		alphanum: true,
 	} as RuleString,
+	$$strict: true,
+};
+
+export const calculatePointsValidator = {
+	purchaseAmount: {
+		type: "number",
+		min: 1,
+	} as RuleNumber,
 	$$strict: true,
 };

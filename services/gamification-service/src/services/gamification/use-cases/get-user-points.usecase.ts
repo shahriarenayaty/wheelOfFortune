@@ -4,6 +4,7 @@ export interface GetUserPointsUseCaseDependencies {
 	gamificationRepository: IGamificationRepository;
 }
 
+
 export class GetUserPointsUseCase {
 	constructor(private dependencies: GetUserPointsUseCaseDependencies) {}
 

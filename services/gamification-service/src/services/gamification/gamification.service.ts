@@ -1,14 +1,20 @@
-import { Context, Service, ServiceBroker } from "moleculer";
+import { Errors, Context, Service, ServiceBroker } from "moleculer";
 import mongoose from "mongoose";
 import { GamificationRepository, IGamificationRepository } from "./gamification.repository";
 import { GetUserPointsUseCase } from "./use-cases/get-user-points.usecase";
 import { RedeemReferralUseCase } from "./use-cases/redeem-referral.usecase";
-import { redeemReferralValidator } from "./gamification.validators";
+import { calculatePointsValidator, redeemReferralValidator } from "./gamification.validators";
 import { pointModel } from "../../models/points";
 import { redeemedReferralModel } from "../../models/redeemed-referral";
 import { AuthGateway } from "./auth.gateway";
+import { computePoints } from "../../utils/calculate-points";
+import { IUser } from "../../utils/user.model";
+import {
+	CalculateAndSavePointsUseCase,
+	CalculatePointsUseCaseParams,
+} from "./use-cases/calculate-save-points.usecase";
 
-const { MoleculerClientError } = require("moleculer").Errors;
+const { MoleculerClientError } = Errors;
 
 export default class GamificationService extends Service {
 	private gamificationRepository!: IGamificationRepository;
@@ -34,6 +40,15 @@ export default class GamificationService extends Service {
 					params: redeemReferralValidator,
 					handler: this.redeemReferral,
 				},
+				calculatePoints: {
+					params: calculatePointsValidator,
+					handler: this.calculatePoints,
+				},
+				calculateAndSavePoints: {
+					//userId comes from authenticated context
+					params: calculatePointsValidator,
+					handler: this.calculateAndSavePoints,
+				},
 			},
 
 			// --- Service Events ---
@@ -42,16 +57,12 @@ export default class GamificationService extends Service {
 					group: "gamification", // For balanced consumption
 					handler: this.onUserRegistered,
 				},
-				"order.successful": {
-					group: "gamification",
-					handler: this.onOrderSuccessful,
-				},
 			},
 		});
 	}
 
 	// --- Action Handlers ---
-	private async getBalance(ctx: Context<{}, { user: { userId: string } }>) {
+	private async getBalance(ctx: Context<{}, { user: IUser }>) {
 		this.verifyAuth(ctx);
 		const useCase = new GetUserPointsUseCase({
 			gamificationRepository: this.gamificationRepository,
@@ -59,7 +70,7 @@ export default class GamificationService extends Service {
 		return useCase.execute(ctx.meta.user.userId);
 	}
 
-	private async redeemReferral(ctx: Context<{ code: string }, { user: { userId: string } }>) {
+	private async redeemReferral(ctx: Context<{ code: string }, { user: IUser }>) {
 		this.verifyAuth(ctx);
 		const useCase = new RedeemReferralUseCase({
 			gamificationRepository: this.gamificationRepository,
@@ -68,26 +79,25 @@ export default class GamificationService extends Service {
 		return useCase.execute({ userId: ctx.meta.user.userId, code: ctx.params.code });
 	}
 
+	private async calculatePoints(ctx: Context<CalculatePointsUseCaseParams>) {
+		const { purchaseAmount } = ctx.params;
+		return computePoints(purchaseAmount);
+	}
+
+	private async calculateAndSavePoints(
+		ctx: Context<CalculatePointsUseCaseParams, { user: IUser }>,
+	) {
+		this.verifyAuth(ctx);
+		const useCase = new CalculateAndSavePointsUseCase({
+			gamificationRepository: this.gamificationRepository,
+		});
+		return useCase.execute(ctx.meta.user.userId, ctx.params.purchaseAmount);
+	}
+
 	// --- Event Handlers ---
 	private async onUserRegistered(ctx: Context<{ userId: string }>) {
 		this.logger.info(`User registered event received for userId: ${ctx.params.userId}`);
 		await this.gamificationRepository.incrementBalance(ctx.params.userId, 1);
-	}
-
-	private async onOrderSuccessful(ctx: Context<{ userId: string; purchaseAmount: number }>) {
-		this.logger.info(`Order successful event received for userId: ${ctx.params.userId}`);
-		const { userId, purchaseAmount } = ctx.params;
-		let pointsToAdd = 0;
-		if (purchaseAmount > 200000) {
-			pointsToAdd = 2;
-		} else if (purchaseAmount > 100000) {
-			pointsToAdd = 1;
-		}
-
-		if (pointsToAdd > 0) {
-			await this.gamificationRepository.incrementBalance(userId, pointsToAdd);
-			this.logger.info(`Awarded ${pointsToAdd} points to user ${userId}.`);
-		}
 	}
 
 	// --- Helper Methods ---

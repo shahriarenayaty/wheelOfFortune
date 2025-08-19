@@ -1,6 +1,7 @@
 // For Injection Tokens
 export const SERVICE_AUTH = 'SERVICE_AUTH';
 export const SERVICE_GAMIFICATION = 'SERVICE_GAMIFICATION';
+export const SERVICE_ORDER = 'SERVICE_ORDER';
 
 // For Action Names
 export const MoleculerActions = {
@@ -10,5 +11,9 @@ export const MoleculerActions = {
   },
   GAMIFICATION: {
     REDEEM: 'gamification.redeem',
+  },
+  ORDER: {
+    CREATE: 'order.create',
+    PAY: 'order.pay',
   },
 };

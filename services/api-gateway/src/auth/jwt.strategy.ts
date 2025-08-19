@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { EnvConfig } from '../utils/config.schema';
 
 export interface IUser {
   userId: string;
 }
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor() {
+  constructor(private readonly configService: ConfigService<EnvConfig>) {
     super({
       // 1. Where to find the token in the request
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -17,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
       // 3. THE CRUCIAL PART: Provide the same secret for verification.
       //    It reads the secret from the environment variables injected by Docker Compose.
-      secretOrKey: process.env.JWT_SECRET || 'SHAHRIAR',
+      secretOrKey: configService.get('JWT_SECRET'),
     });
   }
 

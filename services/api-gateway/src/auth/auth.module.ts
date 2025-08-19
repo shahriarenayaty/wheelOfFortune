@@ -15,8 +15,10 @@ import { EnvConfig } from '../utils/config.schema';
       provide: SERVICE_AUTH,
       inject: [ConfigService],
       useFactory: async (configService: ConfigService<EnvConfig>) => {
+        const randomNumber = Math.floor(Math.random() * 10000);
+
         const broker = new ServiceBroker({
-          nodeID: `${configService.get('NODE_ID_PREFIX')}-${os.hostname().toLowerCase()}-${process.pid}`,
+          nodeID: `${configService.get('NODE_ID_PREFIX')}-${os.hostname().toLowerCase()}-${process.pid}-${randomNumber}`,
           namespace: configService.get('NAMESPACE'),
           transporter: {
             type: 'NATS',
