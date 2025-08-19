@@ -16,7 +16,9 @@ export interface RedeemReferralUseCaseParams {
 export class RedeemReferralUseCase {
 	constructor(private dependencies: RedeemReferralUseCaseDependencies) {}
 
-	public async execute(params: RedeemReferralUseCaseParams): Promise<{ success: boolean }> {
+	public async execute(
+		params: RedeemReferralUseCaseParams,
+	): Promise<{ success: boolean; ownerPhone: string }> {
 		const { gamificationRepository, authGateway } = this.dependencies;
 		const { userId, code } = params;
 
@@ -53,6 +55,6 @@ export class RedeemReferralUseCase {
 			gamificationRepository.markAsRedeemed(userId, code), // Mark as used for this user
 		]);
 
-		return { success: true };
+		return { success: true, ownerPhone: owner.phone };
 	}
 }

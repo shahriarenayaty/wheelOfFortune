@@ -5,6 +5,7 @@ const { MoleculerClientError } = Errors;
 export interface User {
 	_id: string;
 	referralCode: string;
+	phone: string;
 }
 
 export interface IAuthGateway {

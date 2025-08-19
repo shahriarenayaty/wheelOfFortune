@@ -12,10 +12,11 @@ async function bootstrap() {
   // Enable global validation pipe to automatically validate incoming DTOs
   app.useGlobalPipes(new ValidationPipe());
 
+  //TODO: the down have more piority
   app.useGlobalFilters(
-    new MoleculerErrorFilter(),
-    new HttpExceptionFilter(),
     new AllExceptionsFilter(),
+    new HttpExceptionFilter(),
+    new MoleculerErrorFilter(),
   );
 
   await app.listen(3000);

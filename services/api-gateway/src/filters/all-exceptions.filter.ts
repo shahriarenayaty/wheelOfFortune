@@ -12,7 +12,7 @@ import { AppErrorResponseDto } from './app-error-response.dto';
  * Catches any exception that is not an instance of HttpException or MoleculerError.
  * This acts as a final safety net, ensuring that no unhandled exceptions are sent to the client.
  */
-@Catch()
+@Catch(Error)
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
