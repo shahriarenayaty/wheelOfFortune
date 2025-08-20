@@ -88,6 +88,7 @@ export default class SpinWheelUseCase {
 		await this.eventGateway.publishPrizeWon({
 			userId: user.userId,
 			prizeName: winner.name,
+			prizeId: winner.id,
 			prizeDetails,
 			timestamp: new Date(),
 			cost: 1, // The cost of spinning the wheel is always 1 point

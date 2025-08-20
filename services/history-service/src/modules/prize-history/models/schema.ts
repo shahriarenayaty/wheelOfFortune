@@ -7,6 +7,7 @@ export const prizeHistorySchema = new Schema(
 		prizeId: { type: String, required: true },
 		prizeName: { type: String, required: true },
 		prizeDetails: { type: Schema.Types.Mixed, default: {} },
+		cost: { type: Number, required: true },
 		wonAt: { type: Date, default: Date.now },
 	},
 	{ timestamps: true },

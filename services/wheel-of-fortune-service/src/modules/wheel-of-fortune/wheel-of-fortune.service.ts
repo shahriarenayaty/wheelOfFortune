@@ -2,6 +2,7 @@ import { Errors, Service } from "moleculer";
 import type { Context, ServiceBroker } from "moleculer";
 import mongoose from "mongoose";
 import type { IAuth } from "../../common/types/auth.types";
+import { config } from "../../config";
 import { EventGateway } from "./gateways/event.gateway";
 import type { IEventGateway } from "./gateways/event.gateway";
 import { GamificationGateway } from "./gateways/gamification.gateway";
@@ -67,9 +68,9 @@ export default class WheelOfFortuneService extends Service {
 	}
 
 	private async onServiceStarted() {
-		const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/orders";
+		const mongoUri = config.MONGO_URI;
 		await mongoose.connect(mongoUri);
-		this.logger.info("Order Service successfully connected to MongoDB.");
+		this.logger.info("Wheel of Fortune Service successfully connected to MongoDB.");
 	}
 
 	private async onServiceStopped() {

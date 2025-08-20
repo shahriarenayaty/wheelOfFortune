@@ -9,11 +9,12 @@ module.exports = {
 		"prettier",
 	],
 
+	parser: "@typescript-eslint/parser",
 	parserOptions: { tsconfigRootDir: __dirname, project: "./tsconfig.eslint.json" },
 
 	env: { es2021: true, node: true, "jest/globals": true },
 
-	plugins: ["jest"],
+	plugins: ["jest", "@typescript-eslint/eslint-plugin"],
 
 	ignorePatterns: [
 		"node_modules",
@@ -105,7 +106,7 @@ module.exports = {
 				format: null,
 			},
 			// allow variables to be camelCase or UPPER_CASE
-			{ selector: "variable", format: ["camelCase", "UPPER_CASE"] },
+			{ selector: "variable", format: ["camelCase", "UPPER_CASE", "PascalCase"] },
 			// allow known variable exclusions
 			{
 				selector: "variable",
@@ -125,6 +126,11 @@ module.exports = {
 				selector: ["typeLike"],
 				format: ["PascalCase"],
 			},
+			// UPPER_CASE for enums members
+			{
+				selector: "enumMember",
+				format: ["UPPER_CASE"],
+			},
 		],
 
 		// disallow parameter properties in favor of explicit class declarations
@@ -134,6 +140,11 @@ module.exports = {
 		// overrides @typescript-eslint/recommended -- '@typescript-eslint/no-unused-vars': 'warn'
 		// https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/src/configs/recommended.ts
 		"@typescript-eslint/no-unused-vars": "warn",
+
+		"import/no-extraneous-dependencies": [
+			"error",
+			{ devDependencies: true, optionalDependencies: false, peerDependencies: true },
+		],
 	},
 
 	overrides: [
@@ -152,7 +163,10 @@ module.exports = {
 				"@typescript-eslint/unbound-method": "off",
 
 				// force explicit member accessibility modifiers
-				"@typescript-eslint/explicit-member-accessibility": ["error", { accessibility: "no-public" }],
+				"@typescript-eslint/explicit-member-accessibility": [
+					"error",
+					{ accessibility: "no-public" },
+				],
 
 				// enforce return types on module boundaries
 				"@typescript-eslint/explicit-module-boundary-types": "error",
@@ -190,7 +204,7 @@ module.exports = {
 				// allow dev dependencies
 				"import/no-extraneous-dependencies": [
 					"error",
-					{ devDependencies: true, optionalDependencies: false, peerDependencies: false },
+					{ devDependencies: true, optionalDependencies: false, peerDependencies: true },
 				],
 
 				// disallow use of "it" for test blocks
@@ -223,7 +237,7 @@ module.exports = {
 				// prefer called with
 				"jest/prefer-called-with": "error",
 
-				"jest/no-conditional-expect": "off"
+				"jest/no-conditional-expect": "off",
 			},
 		},
 
@@ -263,7 +277,7 @@ module.exports = {
 				"lines-between-class-members": "off",
 				"@typescript-eslint/lines-between-class-members": "off",
 				"@typescript-eslint/member-ordering": "off",
-				"@typescript-eslint/ban-types": "off"
+				"@typescript-eslint/ban-types": "off",
 			},
 		},
 	],

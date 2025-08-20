@@ -10,6 +10,7 @@ export interface IPrize {
 
 export interface PrizeWonEventPayload {
 	userId: string;
+	prizeId: string;
 	prizeName: string;
 	prizeDetails: Record<string, unknown>;
 	timestamp: Date;

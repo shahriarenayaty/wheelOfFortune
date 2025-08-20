@@ -1,5 +1,8 @@
-import type { BrokerOptions, MetricRegistry, ServiceBroker } from "moleculer";
+import os from "os";
+import type { BrokerOptions } from "moleculer";
 import { Errors } from "moleculer";
+import errorHandlerMiddleware from "./src/common/middlewares/errorHandler.middleware";
+import { config } from "./src/config";
 
 /**
  * Moleculer ServiceBroker configuration file
@@ -28,9 +31,11 @@ import { Errors } from "moleculer";
  */
 const brokerConfig: BrokerOptions = {
 	// Namespace of nodes to segment your nodes on the same network.
-	namespace: "",
+	namespace: config.NAMESPACE,
 	// Unique node identifier. Must be unique in a namespace.
-	nodeID: null,
+	nodeID: `${config.NODE_ID_PREFIX}-${os.hostname().toLowerCase()}-${process.pid}-${Math.floor(
+		Math.random() * 10000,
+	)}`,
 	// Custom metadata store. Store here what you want. Accessing: `this.broker.metadata`
 	metadata: {},
 
@@ -59,11 +64,16 @@ const brokerConfig: BrokerOptions = {
 	// More info: https://moleculer.services/docs/0.14/networking.html
 	// Note: During the development, you don't need to define it because all services will be loaded locally.
 	// In production you can set it via `TRANSPORTER=nats://localhost:4222` environment variable.
-	transporter: null, // "NATS"
+	transporter: {
+		type: "NATS",
+		options: {
+			url: config.NATS_URL || "nats://localhost:4222", // Make sure this matches your NestJS config
+		},
+	},
 
 	// Define a cacher.
 	// More info: https://moleculer.services/docs/0.14/caching.html
-    cacher: "Memory",
+	cacher: "Memory",
 
 	// Define a serializer.
 	// Available values: "JSON", "Avro", "ProtoBuf", "MsgPack", "Notepack", "Thrift".
@@ -181,7 +191,7 @@ const brokerConfig: BrokerOptions = {
 	},
 
 	// Register custom middlewares
-	middlewares: [],
+	middlewares: [errorHandlerMiddleware],
 
 	// Register custom REPL commands.
 	replCommands: null,
@@ -194,7 +204,6 @@ const brokerConfig: BrokerOptions = {
 
 	// Called after broker stopped.
 	// async stopped(broker: ServiceBroker): Promise<void> {},
-
 };
 
 export = brokerConfig;
