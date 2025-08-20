@@ -1,18 +1,9 @@
 import { Errors, type ServiceBroker } from "moleculer";
+import type { IAuthGateway, User } from "../gamification.types";
 
 const { MoleculerClientError } = Errors;
 
-export interface User {
-	_id: string;
-	referralCode: string;
-	phone: string;
-}
-
-export interface IAuthGateway {
-	findUserByReferralCode(code: string): Promise<User | null>;
-}
-
-export class AuthGateway implements IAuthGateway {
+export default class AuthGateway implements IAuthGateway {
 	private broker: ServiceBroker;
 
 	constructor(broker: ServiceBroker) {
@@ -20,7 +11,7 @@ export class AuthGateway implements IAuthGateway {
 	}
 
 	async findUserByReferralCode(code: string): Promise<User | null> {
-		const owners: Array<User> = await this.broker.call("auth.find", {
+		const owners: User[] = await this.broker.call("auth.find", {
 			query: { referralCode: code },
 		});
 

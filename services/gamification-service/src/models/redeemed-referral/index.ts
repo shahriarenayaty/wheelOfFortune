@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { redeemedReferralSchema } from "./schema";
-import type { IRedeemedReferral } from "./schema";
+import type { IRedeemedReferral } from "../../modules/gamification/gamification.types";
+import redeemedReferralSchema from "./schema";
 
 export const redeemedReferralModel = mongoose.model<IRedeemedReferral>(
 	"RedeemedReferral",

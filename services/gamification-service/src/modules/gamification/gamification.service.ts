@@ -1,25 +1,35 @@
-import { Errors, Context, Service, ServiceBroker } from "moleculer";
+import { Errors, Service } from "moleculer";
+import type { Context, ServiceBroker } from "moleculer";
 import mongoose from "mongoose";
-import { GamificationRepository, IGamificationRepository } from "./gamification.repository";
-import { GetUserPointsUseCase } from "./use-cases/get-user-points.usecase";
-import { RedeemReferralUseCase } from "./use-cases/redeem-referral.usecase";
-import { calculatePointsValidator, redeemReferralValidator } from "./gamification.validators";
+import type { IAuth } from "../../common/types/user.model";
+import { config } from "../../config";
 import { pointModel } from "../../models/points";
 import { redeemedReferralModel } from "../../models/redeemed-referral";
-import { AuthGateway } from "./auth.gateway";
-import { computePoints } from "../../utils/calculate-points";
-import { IUser, PrizeWonParams } from "../../utils/user.model";
+import GamificationRepository from "./gamification.repository";
+import type {
+	DeductPointsParams,
+	IAuthGateway,
+	IGamificationRepository,
+	PointsToAddParams,
+	RedeemReferralUseCaseParams,
+} from "./gamification.types";
 import {
-	CalculateAndSavePointsUseCase,
-	CalculatePointsUseCaseParams,
-} from "./use-cases/calculate-save-points.usecase";
-import { RecordPrizeWonUseCase } from "./use-cases/record-prize-won.uescase";
+	deductPointsValidator,
+	pointsToAddValidator,
+	redeemReferralValidator,
+} from "./gamification.validators";
+import AuthGateway from "./gateways/auth.gateway";
+import DeductPointsUseCase from "./use-cases/deduct-point.usecase";
+import GetUserPointsUseCase from "./use-cases/get-user-points.usecase";
+import PointsToAddUseCase from "./use-cases/points-to-add.usecase";
+import RedeemReferralUseCase from "./use-cases/redeem-referral.usecase";
 
 const { MoleculerClientError } = Errors;
 
 export default class GamificationService extends Service {
 	private gamificationRepository!: IGamificationRepository;
-	private authGateway!: AuthGateway;
+
+	private authGateway!: IAuthGateway;
 
 	constructor(broker: ServiceBroker) {
 		super(broker);
@@ -41,14 +51,15 @@ export default class GamificationService extends Service {
 					params: redeemReferralValidator,
 					handler: this.redeemReferral,
 				},
-				calculatePoints: {
-					params: calculatePointsValidator,
-					handler: this.calculatePoints,
+				pointsToAdd: {
+					// userId comes from authenticated context
+					params: pointsToAddValidator,
+					handler: this.handlePointsToAdd,
 				},
-				calculateAndSavePoints: {
-					//userId comes from authenticated context
-					params: calculatePointsValidator,
-					handler: this.calculateAndSavePoints,
+				deductPoints: {
+					// userId comes from authenticated context
+					params: deductPointsValidator,
+					handler: this.handleDeductPoints,
 				},
 			},
 
@@ -58,24 +69,20 @@ export default class GamificationService extends Service {
 					group: "gamification", // For balanced consumption
 					handler: this.onUserRegistered,
 				},
-				"prize.won": {
-					group: "gamification",
-					handler: this.onPrizeWon,
-				},
 			},
 		});
 	}
 
 	// --- Action Handlers ---
-	private async getBalance(ctx: Context<{}, { user: IUser }>) {
+	private async getBalance(ctx: Context<unknown, IAuth>) {
 		this.verifyAuth(ctx);
 		const useCase = new GetUserPointsUseCase({
 			gamificationRepository: this.gamificationRepository,
 		});
-		return useCase.execute(ctx.meta.user.userId);
+		return useCase.execute({ userId: ctx.meta.user.userId });
 	}
 
-	private async redeemReferral(ctx: Context<{ code: string }, { user: IUser }>) {
+	private async redeemReferral(ctx: Context<RedeemReferralUseCaseParams, IAuth>) {
 		this.verifyAuth(ctx);
 		const useCase = new RedeemReferralUseCase({
 			gamificationRepository: this.gamificationRepository,
@@ -84,19 +91,26 @@ export default class GamificationService extends Service {
 		return useCase.execute({ userId: ctx.meta.user.userId, code: ctx.params.code });
 	}
 
-	private async calculatePoints(ctx: Context<CalculatePointsUseCaseParams>) {
-		const { purchaseAmount } = ctx.params;
-		return computePoints(purchaseAmount);
-	}
-
-	private async calculateAndSavePoints(
-		ctx: Context<CalculatePointsUseCaseParams, { user: IUser }>,
-	) {
+	private async handlePointsToAdd(ctx: Context<PointsToAddParams, IAuth>) {
 		this.verifyAuth(ctx);
-		const useCase = new CalculateAndSavePointsUseCase({
+		const useCase = new PointsToAddUseCase({
 			gamificationRepository: this.gamificationRepository,
 		});
-		return useCase.execute(ctx.meta.user.userId, ctx.params.purchaseAmount);
+		return useCase.execute({
+			pointsToAdd: ctx.params.pointsToAdd,
+			user: ctx.meta.user,
+		});
+	}
+
+	private async handleDeductPoints(ctx: Context<DeductPointsParams, IAuth>) {
+		this.verifyAuth(ctx);
+		const useCase = new DeductPointsUseCase({
+			gamificationRepository: this.gamificationRepository,
+		});
+		return useCase.execute({
+			pointsToDeduct: ctx.params.pointsToDeduct,
+			user: ctx.meta.user,
+		});
 	}
 
 	// --- Event Handlers ---
@@ -105,16 +119,8 @@ export default class GamificationService extends Service {
 		await this.gamificationRepository.incrementBalance(ctx.params.userId, 1);
 	}
 
-	private async onPrizeWon(ctx: Context<PrizeWonParams>) {
-		this.logger.info(`Prize won event received:`, ctx.params);
-		const usecase = new RecordPrizeWonUseCase({
-			gamificationRepository: this.gamificationRepository,
-		});
-		return usecase.execute(ctx.params);
-	}
-
 	// --- Helper Methods ---
-	private verifyAuth(ctx: Context<any, any>) {
+	private verifyAuth(ctx: Context<unknown, IAuth>) {
 		if (!ctx.meta.user || !ctx.meta.user.userId) {
 			throw new MoleculerClientError("Unauthorized", 401, "UNAUTHORIZED");
 		}
@@ -130,7 +136,7 @@ export default class GamificationService extends Service {
 
 	private async onServiceStarted() {
 		// This hook is called after the service has been started.
-		const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/gamification";
+		const mongoUri = config.MONGO_URI;
 		await mongoose.connect(mongoUri);
 		this.logger.info("Successfully connected to MongoDB.");
 	}

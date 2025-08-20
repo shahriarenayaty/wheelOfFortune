@@ -1,20 +1,15 @@
 import type { Model } from "mongoose";
-import type { IPoint, PointDocument } from "../../models/points/schema";
 import type {
+	IGamificationRepository,
+	IPoint,
 	IRedeemedReferral,
+	PointDocument,
 	RedeemedReferralDocument,
-} from "../../models/redeemed-referral/schema";
+} from "./gamification.types";
 
-export interface IGamificationRepository {
-	findPointBalanceByUserId(userId: string): Promise<PointDocument | null>;
-	incrementBalance(userId: string, amount: number): Promise<PointDocument>;
-	decrementBalance(userId: string, amount: number): Promise<PointDocument>;
-	hasUserRedeemed(userId: string): Promise<boolean>;
-	markAsRedeemed(userId: string, code: string): Promise<RedeemedReferralDocument>;
-}
-
-export class GamificationRepository implements IGamificationRepository {
+export default class GamificationRepository implements IGamificationRepository {
 	private pointModel: Model<IPoint>;
+
 	private redeemedReferralModel: Model<IRedeemedReferral>;
 
 	constructor(pointModel: Model<IPoint>, redeemedReferralModel: Model<IRedeemedReferral>) {
@@ -50,6 +45,4 @@ export class GamificationRepository implements IGamificationRepository {
 	async markAsRedeemed(userId: string, code: string): Promise<RedeemedReferralDocument> {
 		return this.redeemedReferralModel.create({ userId, codeUsed: code });
 	}
-
-	
 }

@@ -14,7 +14,7 @@ export type OrderDocument = HydratedDocument<IOrder>;
 export const orderSchema = new Schema(
 	{
 		userId: { type: String, required: true, index: true },
-		amount: { type: Number, required: true },
+		amountInToman: { type: Number, required: true },
 		status: { type: String, enum: Object.values(OrderStatus), default: OrderStatus.PENDING },
 	},
 	{ timestamps: true },

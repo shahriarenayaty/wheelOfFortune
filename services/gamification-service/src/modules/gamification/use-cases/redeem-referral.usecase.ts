@@ -1,24 +1,20 @@
-import { ServiceBroker } from "moleculer";
-import { IGamificationRepository } from "../gamification.repository";
-import { IAuthGateway } from "../auth.gateway";
-const { MoleculerClientError } = require("moleculer").Errors;
+import { Errors } from "moleculer";
+import type {
+	RedeemReferralUseCaseDependencies,
+	RedeemReferralUseCaseParams,
+	RedeemReferralUseCaseResponse,
+} from "../gamification.types";
 
-export interface RedeemReferralUseCaseDependencies {
-	gamificationRepository: IGamificationRepository;
-	authGateway: IAuthGateway;
-}
+const { MoleculerClientError } = Errors;
 
-export interface RedeemReferralUseCaseParams {
-	userId: string; // The user redeeming the code
-	code: string;
-}
+export default class RedeemReferralUseCase {
+	private dependencies: RedeemReferralUseCaseDependencies;
 
-export class RedeemReferralUseCase {
-	constructor(private dependencies: RedeemReferralUseCaseDependencies) {}
+	constructor(dependencies: RedeemReferralUseCaseDependencies) {
+		this.dependencies = dependencies;
+	}
 
-	public async execute(
-		params: RedeemReferralUseCaseParams,
-	): Promise<{ success: boolean; ownerPhone: string }> {
+	async execute(params: RedeemReferralUseCaseParams): Promise<RedeemReferralUseCaseResponse> {
 		const { gamificationRepository, authGateway } = this.dependencies;
 		const { userId, code } = params;
 

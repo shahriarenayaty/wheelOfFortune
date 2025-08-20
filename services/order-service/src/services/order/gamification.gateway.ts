@@ -1,16 +1,19 @@
 import { type ServiceBroker } from "moleculer";
 
-export interface IGamificationGateway {
-	publishOrderSuccessful(userId: string, purchaseAmount: number): void;
-	fetchUserBalance(meta: object): Promise<{ balance: number }>;
-	calculateOrderPoints(purchaseAmount: number): Promise<number>;
-	calculateAndSaveOrderPoints(
-		purchaseAmount: number,
-		meta: object,
-	): Promise<{ newPoints: number }>;
+export interface PointsToAddResponse {
+	newBalance: number;
+}
+export interface GetUserPointsUseCaseResponse {
+	balance: number;
 }
 
+export interface IGamificationGateway {
+	publishOrderSuccessful(userId: string, purchaseAmount: number): void;
 
+	fetchUserBalance(meta: object): Promise<{ balance: number }>;
+
+	pointsToAdd(pointsToAdd: number, meta: object): Promise<PointsToAddResponse>;
+}
 
 export class GamificationGateway implements IGamificationGateway {
 	private broker: ServiceBroker;
@@ -23,23 +26,18 @@ export class GamificationGateway implements IGamificationGateway {
 		await this.broker.emit("order.successful", { userId, purchaseAmount });
 	}
 
-	async fetchUserBalance(meta: object): Promise<{ balance: number }> {
+	async fetchUserBalance(meta: object): Promise<GetUserPointsUseCaseResponse> {
 		// We need to pass the meta object for authentication purposes
 		return this.broker.call("gamification.getBalance", {}, { meta });
 	}
 
-	async calculateOrderPoints(purchaseAmount: number): Promise<number> {
-		return this.broker.call("gamification.calculatePoints", { purchaseAmount });
-	}
-
-	async calculateAndSaveOrderPoints(
-		purchaseAmount: number,
-		meta: object,
-	): Promise<{ newPoints: number }> {
-		return this.broker.call(
-			"gamification.calculateAndSavePoints",
-			{ purchaseAmount },
-			{ meta },
-		);
+	async pointsToAdd(pointsToAdd: number, meta: object): Promise<PointsToAddResponse> {
+		try {
+			return await this.broker.call("gamification.addPoints", { pointsToAdd }, { meta });
+		} catch (error) {
+			return {
+				newBalance: -1,
+			};
+		}
 	}
 }
