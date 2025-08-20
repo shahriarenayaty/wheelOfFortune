@@ -7,6 +7,7 @@ import { ReferralsModule } from './referrals/referrals.module';
 import { OrderModule } from './order/order.module';
 import { WheelModule } from './wheel/wheel.module';
 import { HistoryModule } from './history/history.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { HistoryModule } from './history/history.module';
     OrderModule,
     WheelModule,
     HistoryModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],

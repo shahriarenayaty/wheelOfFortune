@@ -16,7 +16,7 @@ export class AuthController {
     return this.broker.call(MoleculerActions.AUTH.LOGIN, loginDto);
   }
 
-  @Post('register')
+  @Post('')
   register(@Body() registerDto: RegisterDto) {
     return this.broker.call(MoleculerActions.AUTH.REGISTER, registerDto);
   }

@@ -13,6 +13,7 @@ export const MoleculerActions = {
   },
   GAMIFICATION: {
     REDEEM: 'gamification.redeem',
+    GET_BALANCE: 'gamification.getBalance',
   },
   ORDER: {
     CREATE: 'order.create',
