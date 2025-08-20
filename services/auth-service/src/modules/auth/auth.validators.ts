@@ -19,10 +19,10 @@ export const registerValidator = {
 		},
 	} as RuleString,
 	$$strict: true, // Disallow any properties not defined in the schema
-};
+} as const;
 
 export const loginValidator = {
 	phone: { type: "string", pattern: phonePattern },
 	password: { type: "string", min: 1 }, // A simple check that it's not empty
 	$$strict: true,
-};
+} as const;

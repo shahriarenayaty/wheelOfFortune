@@ -1,11 +1,9 @@
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { Errors } from "moleculer";
-import { v4 as uuid } from "uuid";
-import { config } from "../../../src/config";
-import type { UserDocument } from "../../../src/models/user/schema";
+import { generateReferralCode, generateToken, hashPassword } from "../../../common/utils";
 import type { IUserRepository } from "../auth.repository";
-import { type IGamificationGateway } from "../gamification.gateway";
+import type { RegisterUseCaseParams, RegisterUseCaseResult } from "../auth.types";
+import type { IGamificationGateway } from "../gateways/gamification.gateway";
+import type { UserDocument } from "../models/user/schema";
 
 const { MoleculerClientError } = Errors;
 
@@ -15,12 +13,6 @@ export interface RegisterUseCaseDependencies {
 	gamificationGateway: IGamificationGateway;
 }
 
-// Define the input parameters for this specific use case
-export interface RegisterUseCaseParams {
-	phone: string;
-	password: string;
-}
-
 export class RegisterUseCase {
 	private dependencies: RegisterUseCaseDependencies;
 
@@ -28,9 +20,7 @@ export class RegisterUseCase {
 		this.dependencies = dependencies;
 	}
 
-	async execute(
-		params: RegisterUseCaseParams,
-	): Promise<{ token: string; referralCode: string; userId: string }> {
+	async execute(params: RegisterUseCaseParams): Promise<RegisterUseCaseResult> {
 		const { phone, password } = params;
 		const { userRepository } = this.dependencies;
 
@@ -45,10 +35,10 @@ export class RegisterUseCase {
 		}
 
 		// 2. Hash the password
-		const hashedPassword = await bcrypt.hash(password, 10);
+		const hashedPassword = await hashPassword(password);
 
 		// 3. Create the new user
-		const referralCode = uuid().slice(0, 8).toUpperCase();
+		const referralCode = generateReferralCode();
 		const user: UserDocument = await userRepository.create({
 			phone,
 			password: hashedPassword,
@@ -56,12 +46,7 @@ export class RegisterUseCase {
 		});
 
 		// 4. Generate a JWT
-		const privateKey = config.PRIVATE_KEY.replace(/\\n/g, "\n");
-		const token = jwt.sign(
-			{ userId: user._id }, // Payload
-			privateKey, // Secret Key
-			{ expiresIn: "1h", algorithm: "RS256" }, // Options
-		);
+		const token = generateToken(user);
 
 		// 5. Notify the gamification service and reward the user
 		await this.dependencies.gamificationGateway.notifyUserRegistered(user._id.toString());

@@ -1,11 +1,8 @@
 import os from "os";
-import type { BrokerOptions, MetricRegistry, ServiceBroker } from "moleculer";
+import type { BrokerOptions, MetricRegistry } from "moleculer";
 import { Errors } from "moleculer";
+import errorHandlerMiddleware from "./src/common/middlewares/errorHandler.middleware";
 import { config } from "./src/config";
-import errorHandlerMiddleware from "./utils/errorHandler.middleware";
-
-// Validate environment variables
-// validateEnv(process.env);
 
 /**
  * Moleculer ServiceBroker configuration file
@@ -207,39 +204,10 @@ const brokerConfig: BrokerOptions = {
 	middlewares: [errorHandlerMiddleware],
 
 	// Called after broker created.
-	created(broker: ServiceBroker) {
-		// broker.loadService("path/to/your/service.file");
-	},
+	// created(broker: ServiceBroker): void {},
 
 	// Called after broker started.
-	async started(broker: ServiceBroker): Promise<void> {
-		const natsUrl = process.env.NATS_URL || "nats://localhost:4222";
-		broker.logger.info(`🚀 Broker started. Transporter: NATS (${natsUrl})`);
-		try {
-			const actions: unknown = await broker.call("$node.actions", { onlyLocal: true });
-			if (Array.isArray(actions)) {
-				(actions as { name?: string }[]).forEach((a) => {
-					if (a?.name) {
-						broker.logger.info(`🔊 Listening action: ${a.name} on ${natsUrl}`);
-					}
-				});
-			}
-		} catch (err) {
-			broker.logger.warn("Could not list actions", err instanceof Error ? err.message : err);
-		}
-		try {
-			const events: unknown = await broker.call("$node.events", { onlyLocal: true });
-			if (Array.isArray(events)) {
-				(events as { name?: string }[]).forEach((e) => {
-					if (e?.name) {
-						broker.logger.info(`📢 Subscribed event: ${e.name} on ${natsUrl}`);
-					}
-				});
-			}
-		} catch (err) {
-			broker.logger.warn("Could not list events", err instanceof Error ? err.message : err);
-		}
-	},
+	// async started(broker: ServiceBroker): Promise<void> {},
 
 	// Called after broker stopped.
 	// async stopped(broker: ServiceBroker): Promise<void> {},

@@ -1,5 +1,5 @@
-import type MongooseDbAdapter from "moleculer-db-adapter-mongoose";
-import type { IUser, UserDocument } from "../../src/models/user/schema";
+import type { Model } from "mongoose";
+import type { IUser, UserDocument } from "./models/user/schema";
 
 export interface IUserRepository {
 	/** Finds a single user by their phone number */
@@ -10,20 +10,20 @@ export interface IUserRepository {
 }
 
 export class UserRepository implements IUserRepository {
-	private adapter: MongooseDbAdapter<UserDocument>;
+	private userModel: Model<IUser>;
 
-	constructor(adapter: MongooseDbAdapter<UserDocument>) {
-		this.adapter = adapter;
+	constructor(userModel: Model<IUser>) {
+		this.userModel = userModel;
 	}
 
 	async findByPhone(phone: string): Promise<UserDocument | null> {
-		return this.adapter.findOne({ phone });
+		return this.userModel.findOne({ phone });
 	}
 
 	async create(data: Partial<IUser>): Promise<UserDocument> {
 		// const user = new this.adapter(data);
 
-		const user = await this.adapter.insert(data as IUser);
+		const user = await this.userModel.create(data as IUser);
 		return user;
 	}
 }

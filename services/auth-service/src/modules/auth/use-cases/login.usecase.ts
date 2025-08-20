@@ -1,21 +1,15 @@
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { Errors } from "moleculer";
-import { config } from "../../../src/config";
-import type { UserDocument } from "../../../src/models/user/schema";
+import { generateToken } from "../../../common/utils";
+import comparePassword from "../../../common/utils/compare-password";
 import type { IUserRepository } from "../auth.repository";
+import type { LoginUseCaseParams } from "../auth.types";
+import type { UserDocument } from "../models/user/schema";
 
 const { MoleculerClientError } = Errors;
 
 // Define the dependencies this use case needs
 export interface LoginUseCaseDependencies {
 	userRepository: IUserRepository;
-}
-
-// Define the input parameters for this specific use case
-export interface LoginUseCaseParams {
-	phone: string;
-	password: string;
 }
 
 export class LoginUseCase {
@@ -39,7 +33,7 @@ export class LoginUseCase {
 			throw new MoleculerClientError("Invalid credentials provided.", 401, "INVALID_PHONE");
 		}
 
-		const isPasswordCorrect = await bcrypt.compare(password, user.password);
+		const isPasswordCorrect = await comparePassword(password, user.password);
 		if (!isPasswordCorrect) {
 			throw new MoleculerClientError(
 				"Invalid credentials provided.",
@@ -49,13 +43,7 @@ export class LoginUseCase {
 		}
 
 		// 3. If credentials are valid, generate a JWT
-		const privateKey = config.PRIVATE_KEY.replace(/\\n/g, "\n");
-
-		const token = jwt.sign(
-			{ userId: user._id }, // Payload
-			privateKey,
-			{ expiresIn: "1h", algorithm: "RS256" }, // Options
-		);
+		const token = generateToken(user);
 
 		// 4. Return the token
 		return { token };
