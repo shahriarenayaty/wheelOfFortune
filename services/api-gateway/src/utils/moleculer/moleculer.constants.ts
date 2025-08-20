@@ -21,4 +21,7 @@ export const MoleculerActions = {
   WHEEL: {
     SPIN: 'wheel-of-fortune.spin',
   },
+  HISTORY: {
+    PRIZE: 'history.prize',
+  },
 };

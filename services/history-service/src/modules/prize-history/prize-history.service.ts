@@ -6,6 +6,7 @@ import { config } from "../../config";
 import { prizeHistoryModel } from "./models";
 import { type IPrizeHistoryRepository, PrizeHistoryRepository } from "./prize-history.repository";
 import type { PrizeWonParams } from "./prize-hostory.types";
+import { GetPrizeHistoryUseCase } from "./use-cases/get-prize-history.usecase";
 import SavePrizeHistoryUseCase from "./use-cases/save-prize-history.usecase";
 
 const { MoleculerClientError } = Errors;
@@ -43,7 +44,10 @@ export default class PrizeHistoryService extends Service {
 	// --- Action Handlers ---
 	private handlePrizeHistory(ctx: Context<unknown, IAuth>) {
 		this.verifyAuth(ctx);
-		// TODO: Implement the use case execution
+		const usecase = new GetPrizeHistoryUseCase({
+			repository: this.repository,
+		});
+		return usecase.execute(ctx.meta);
 	}
 
 	// --- Event Handlers ---

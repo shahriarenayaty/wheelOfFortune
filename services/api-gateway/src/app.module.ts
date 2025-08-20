@@ -6,6 +6,7 @@ import { validateSchema } from './utils/config.schema';
 import { ReferralsModule } from './referrals/referrals.module';
 import { OrderModule } from './order/order.module';
 import { WheelModule } from './wheel/wheel.module';
+import { HistoryModule } from './history/history.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { WheelModule } from './wheel/wheel.module';
     ReferralsModule,
     OrderModule,
     WheelModule,
+    HistoryModule,
   ],
   controllers: [],
   providers: [],

@@ -1,9 +1,6 @@
-import { Errors } from "moleculer";
-import type { IAuth } from "../../../common/types/auth.types";
 import type { IPrizeHistoryRepository } from "../prize-history.repository";
 import type { ICreatePrizeHistory, PrizeWonParams } from "../prize-hostory.types";
 
-const { MoleculerClientError } = Errors;
 interface Dependencies {
 	repository: IPrizeHistoryRepository;
 }
