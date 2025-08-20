@@ -10,6 +10,8 @@ export interface IGamificationGateway {
 	): Promise<{ newPoints: number }>;
 }
 
+
+
 export class GamificationGateway implements IGamificationGateway {
 	private broker: ServiceBroker;
 
@@ -29,6 +31,7 @@ export class GamificationGateway implements IGamificationGateway {
 	async calculateOrderPoints(purchaseAmount: number): Promise<number> {
 		return this.broker.call("gamification.calculatePoints", { purchaseAmount });
 	}
+
 	async calculateAndSaveOrderPoints(
 		purchaseAmount: number,
 		meta: object,

@@ -4,6 +4,7 @@ export interface IPrize {
 	id: string; // A unique identifier for the prize
 	name: string; // The user-facing name (in Persian)
 	weight: number;
+	unique: boolean;
 	detailsGenerator?: () => Record<string, unknown>; // Function to generate dynamic details like a discount code
 }
 
@@ -12,6 +13,16 @@ export interface PrizeWonEventPayload {
 	prizeName: string;
 	prizeDetails: Record<string, unknown>;
 	timestamp: Date;
+	cost: number;
 }
 
 export type ICreateWonPrize = Omit<IWonPrize, "createdAt" | "updatedAt">;
+
+export interface IUserBalanceResponse {
+	balance: number;
+}
+
+export interface ISpinWheelResponse {
+	prizeName: string;
+	prizeDetails: Record<string, unknown>;
+}

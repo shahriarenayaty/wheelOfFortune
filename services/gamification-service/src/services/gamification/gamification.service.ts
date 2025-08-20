@@ -8,11 +8,12 @@ import { pointModel } from "../../models/points";
 import { redeemedReferralModel } from "../../models/redeemed-referral";
 import { AuthGateway } from "./auth.gateway";
 import { computePoints } from "../../utils/calculate-points";
-import { IUser } from "../../utils/user.model";
+import { IUser, PrizeWonParams } from "../../utils/user.model";
 import {
 	CalculateAndSavePointsUseCase,
 	CalculatePointsUseCaseParams,
 } from "./use-cases/calculate-save-points.usecase";
+import { RecordPrizeWonUseCase } from "./use-cases/record-prize-won.uescase";
 
 const { MoleculerClientError } = Errors;
 
@@ -57,6 +58,10 @@ export default class GamificationService extends Service {
 					group: "gamification", // For balanced consumption
 					handler: this.onUserRegistered,
 				},
+				"prize.won": {
+					group: "gamification",
+					handler: this.onPrizeWon,
+				},
 			},
 		});
 	}
@@ -98,6 +103,14 @@ export default class GamificationService extends Service {
 	private async onUserRegistered(ctx: Context<{ userId: string }>) {
 		this.logger.info(`User registered event received for userId: ${ctx.params.userId}`);
 		await this.gamificationRepository.incrementBalance(ctx.params.userId, 1);
+	}
+
+	private async onPrizeWon(ctx: Context<PrizeWonParams>) {
+		this.logger.info(`Prize won event received:`, ctx.params);
+		const usecase = new RecordPrizeWonUseCase({
+			gamificationRepository: this.gamificationRepository,
+		});
+		return usecase.execute(ctx.params);
 	}
 
 	// --- Helper Methods ---

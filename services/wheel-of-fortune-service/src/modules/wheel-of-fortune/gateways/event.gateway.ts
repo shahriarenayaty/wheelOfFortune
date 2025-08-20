@@ -1,7 +1,11 @@
 import type { ServiceBroker } from "moleculer";
 import type { PrizeWonEventPayload } from "../wheel-of-fortune.types";
 
-export default class EventGateway {
+export interface IEventGateway {
+	publishPrizeWon(payload: PrizeWonEventPayload): Promise<void>;
+}
+
+export class EventGateway implements IEventGateway {
 	private broker: ServiceBroker;
 
 	constructor(broker: ServiceBroker) {

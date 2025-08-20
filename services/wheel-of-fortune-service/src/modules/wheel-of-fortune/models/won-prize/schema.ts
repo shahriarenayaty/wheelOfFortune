@@ -3,7 +3,7 @@ import type { HydratedDocument, InferSchemaType } from "mongoose";
 
 export const wonPrizeSchema = new Schema(
 	{
-		userId: { type: String, required: true, unique: true, index: true },
+		userId: { type: String, required: true },
 		prizeId: { type: String, required: true },
 		prizeName: { type: String, required: true },
 		prizeDetails: { type: Schema.Types.Mixed, default: {} },
