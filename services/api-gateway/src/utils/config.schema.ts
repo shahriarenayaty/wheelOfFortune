@@ -4,7 +4,7 @@ const configSchema = z.object({
   NATS_URL: z.string(),
   NAMESPACE: z.string(),
   NODE_ID_PREFIX: z.string(),
-  JWT_SECRET: z.string(),
+  PUBLIC_KEY: z.string().startsWith('-----BEGIN PUBLIC KEY-----'),
 });
 
 export function validateSchema(config: Record<string, unknown>) {

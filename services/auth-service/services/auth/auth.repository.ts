@@ -1,5 +1,5 @@
 import type MongooseDbAdapter from "moleculer-db-adapter-mongoose";
-import type { IUser, UserDocument } from "../../models/user/schema";
+import type { IUser, UserDocument } from "../../src/models/user/schema";
 
 export interface IUserRepository {
 	/** Finds a single user by their phone number */

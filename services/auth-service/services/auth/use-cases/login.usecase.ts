@@ -1,7 +1,8 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Errors } from "moleculer";
-import type { UserDocument } from "../../../models/user/schema";
+import { config } from "../../../src/config";
+import type { UserDocument } from "../../../src/models/user/schema";
 import type { IUserRepository } from "../auth.repository";
 
 const { MoleculerClientError } = Errors;
@@ -9,7 +10,6 @@ const { MoleculerClientError } = Errors;
 // Define the dependencies this use case needs
 export interface LoginUseCaseDependencies {
 	userRepository: IUserRepository;
-	jwtSecret: string; // The secret key for signing tokens
 }
 
 // Define the input parameters for this specific use case
@@ -27,7 +27,7 @@ export class LoginUseCase {
 
 	async execute(params: LoginUseCaseParams): Promise<{ token: string }> {
 		const { phone, password } = params;
-		const { userRepository, jwtSecret } = this.dependencies;
+		const { userRepository } = this.dependencies;
 
 		// 1. Find the user by their phone number
 		const user: UserDocument | null = await userRepository.findByPhone(phone);
@@ -49,10 +49,12 @@ export class LoginUseCase {
 		}
 
 		// 3. If credentials are valid, generate a JWT
+		const privateKey = config.PRIVATE_KEY.replace(/\\n/g, "\n");
+
 		const token = jwt.sign(
 			{ userId: user._id }, // Payload
-			jwtSecret, // Secret Key
-			{ expiresIn: "1h" }, // Options
+			privateKey,
+			{ expiresIn: "1h", algorithm: "RS256" }, // Options
 		);
 
 		// 4. Return the token

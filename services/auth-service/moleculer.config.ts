@@ -1,11 +1,11 @@
 import os from "os";
 import type { BrokerOptions, MetricRegistry, ServiceBroker } from "moleculer";
 import { Errors } from "moleculer";
-import { validateEnv } from "./utils/config.schema";
+import { config } from "./src/config";
 import errorHandlerMiddleware from "./utils/errorHandler.middleware";
 
 // Validate environment variables
-validateEnv(process.env);
+// validateEnv(process.env);
 
 /**
  * Moleculer ServiceBroker configuration file
@@ -34,9 +34,9 @@ validateEnv(process.env);
  */
 const brokerConfig: BrokerOptions = {
 	// Namespace of nodes to segment your nodes on the network.
-	namespace: process.env.NAMESPACE,
+	namespace: config.NAMESPACE,
 	// Unique node identifier. Must be unique in a namespace on the same machine.
-	nodeID: `${process.env.NODE_ID_PREFIX}-${os.hostname().toLowerCase()}-${process.pid}`,
+	nodeID: `${config.NODE_ID_PREFIX}-${os.hostname().toLowerCase()}-${process.pid}`,
 	// Custom metadata store. Store here what you want. Accessing: `this.broker.metadata`
 	metadata: {},
 

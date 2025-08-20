@@ -10,6 +10,8 @@ export interface IUser {
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(private readonly configService: ConfigService<EnvConfig>) {
+    const publicKey = configService.get('PUBLIC_KEY').replace(/\\n/g, '\n');
+
     super({
       // 1. Where to find the token in the request
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -19,7 +21,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
       // 3. THE CRUCIAL PART: Provide the same secret for verification.
       //    It reads the secret from the environment variables injected by Docker Compose.
-      secretOrKey: configService.get('JWT_SECRET'),
+      secretOrKey: publicKey,
+
+      // 4. Specify the algorithm.
+      //    This tells passport-jwt to use public key cryptography (RS256)
+      //    instead of symmetric shared secrets (HS256).
+      algorithms: ['RS256'],
     });
   }
 

@@ -2,7 +2,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Errors } from "moleculer";
 import { v4 as uuid } from "uuid";
-import type { UserDocument } from "../../../models/user/schema";
+import { config } from "../../../src/config";
+import type { UserDocument } from "../../../src/models/user/schema";
 import type { IUserRepository } from "../auth.repository";
 import { type IGamificationGateway } from "../gamification.gateway";
 
@@ -12,7 +13,6 @@ const { MoleculerClientError } = Errors;
 export interface RegisterUseCaseDependencies {
 	userRepository: IUserRepository;
 	gamificationGateway: IGamificationGateway;
-	jwtSecret: string; // The secret key for signing tokens
 }
 
 // Define the input parameters for this specific use case
@@ -32,7 +32,7 @@ export class RegisterUseCase {
 		params: RegisterUseCaseParams,
 	): Promise<{ token: string; referralCode: string; userId: string }> {
 		const { phone, password } = params;
-		const { userRepository, jwtSecret } = this.dependencies;
+		const { userRepository } = this.dependencies;
 
 		// 1. Check if user already exists
 		const existingUser: UserDocument | null = await userRepository.findByPhone(phone);
@@ -56,10 +56,11 @@ export class RegisterUseCase {
 		});
 
 		// 4. Generate a JWT
+		const privateKey = config.PRIVATE_KEY.replace(/\\n/g, "\n");
 		const token = jwt.sign(
 			{ userId: user._id }, // Payload
-			jwtSecret, // Secret Key
-			{ expiresIn: "1h" }, // Options
+			privateKey, // Secret Key
+			{ expiresIn: "1h", algorithm: "RS256" }, // Options
 		);
 
 		// 5. Notify the gamification service and reward the user

@@ -2,8 +2,8 @@ import type { Context, ServiceBroker } from "moleculer";
 import { Errors, Service } from "moleculer";
 import DbService from "moleculer-db";
 import MongooseDbAdapter from "moleculer-db-adapter-mongoose";
-import { userModel } from "../../models/user";
-import type { UserDocument } from "../../models/user/schema";
+import { userModel } from "../../src/models/user";
+import type { UserDocument } from "../../src/models/user/schema";
 import { UserRepository } from "./auth.repository";
 import { loginValidator, registerValidator } from "./auth.validators";
 import { GamificationGateway } from "./gamification.gateway";
@@ -19,8 +19,6 @@ export default class AuthService extends Service {
 	);
 
 	private userRepository!: UserRepository;
-
-	private jwtSecret!: string;
 
 	private gamificationGateway!: GamificationGateway;
 
@@ -56,18 +54,7 @@ export default class AuthService extends Service {
 			 * The 'started' hook is called after the service has been started.
 			 * It's a great place to validate configuration and environment variables.
 			 */
-			started: () => {
-				const secret = process.env.JWT_SECRET;
-				if (!secret) {
-					// This will stop the service from starting if the secret is missing.
-					throw new MoleculerClientError(
-						"JWT_SECRET environment variable is not defined.",
-						500, // Use 500 for server configuration errors
-						"JWT_SECRET_NOT_DEFINED",
-					);
-				}
-				this.jwtSecret = secret;
-			},
+			started: () => {},
 
 			// Service actions
 			actions: {
@@ -79,7 +66,6 @@ export default class AuthService extends Service {
 						const useCase = new RegisterUseCase({
 							userRepository: this.userRepository,
 							gamificationGateway: this.gamificationGateway,
-							jwtSecret: this.jwtSecret,
 						});
 
 						return useCase.execute(ctx.params);
@@ -91,7 +77,6 @@ export default class AuthService extends Service {
 					async handler(ctx: Context<LoginUseCaseParams>): Promise<{ token: string }> {
 						const useCase = new LoginUseCase({
 							userRepository: this.userRepository,
-							jwtSecret: this.jwtSecret,
 						});
 
 						// 2. Execute the use case with the validated parameters
