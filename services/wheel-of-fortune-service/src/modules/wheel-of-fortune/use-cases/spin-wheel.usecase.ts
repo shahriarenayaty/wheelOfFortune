@@ -3,25 +3,25 @@ import type { IAuth } from "../../../common/types/auth.types";
 import PRIZE_POOL from "../constants/prize-pool.constants";
 import type { IEventGateway } from "../gateways/event.gateway";
 import type { IGamificationGateway } from "../gateways/gamification.gateway";
-import type { IWheelOfFortuneRepository } from "../wheel-of-fortune.repository";
+import type { IHistoryGateway } from "../gateways/history.gateway";
 import type { IPrize, ISpinWheelResponse } from "../wheel-of-fortune.types";
 
 const { MoleculerClientError } = Errors;
 interface Dependencies {
-	repository: IWheelOfFortuneRepository;
 	gamificationGateway: IGamificationGateway;
 	eventGateway: IEventGateway;
+	historyGateway: IHistoryGateway;
 }
 
 export default class SpinWheelUseCase {
-	private readonly repository: IWheelOfFortuneRepository;
+	private readonly historyGateway: IHistoryGateway;
 
 	private readonly gamificationGateway: IGamificationGateway;
 
 	private readonly eventGateway: IEventGateway;
 
 	constructor(dependencies: Dependencies) {
-		this.repository = dependencies.repository;
+		this.historyGateway = dependencies.historyGateway;
 		this.gamificationGateway = dependencies.gamificationGateway;
 		this.eventGateway = dependencies.eventGateway;
 	}
@@ -43,7 +43,7 @@ export default class SpinWheelUseCase {
 		}
 
 		// 2. Fetch the user's prize history to determine available prizes.
-		const wonPrizes = await this.repository.findWonPrizesByUserId(user.userId);
+		const wonPrizes = await this.historyGateway.fetchUserPrizeWon(params);
 		const activeWonPrizeIds = new Set(
 			wonPrizes
 				.map((p) => p.prizeId)
@@ -76,15 +76,8 @@ export default class SpinWheelUseCase {
 		// 5. Generate prize details (e.g., a unique discount code).
 		const prizeDetails = winner.detailsGenerator ? winner.detailsGenerator() : {};
 
-		// 6. Save the prize to the user's history in the database.
-		await this.repository.saveWonPrize({
-			userId: user.userId,
-			prizeId: winner.id,
-			prizeName: winner.name,
-			prizeDetails,
-		});
-
-		// 7. Publish a prize.won event.
+	
+		// 6. Publish a prize.won event.
 		await this.eventGateway.publishPrizeWon({
 			userId: user.userId,
 			prizeName: winner.name,
@@ -111,6 +104,9 @@ export default class SpinWheelUseCase {
 			probability: `${((p.weight / totalWeight) * 100).toFixed(2)}%`,
 		}));
 
+
+
+        // eslint-disable-next-line no-console
 		console.table(probabilities);
 
 		for (const prize of prizes) {

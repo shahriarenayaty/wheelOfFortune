@@ -1,5 +1,3 @@
-import type { IWonPrize } from "./models/won-prize/schema";
-
 export interface IPrize {
 	id: string; // A unique identifier for the prize
 	name: string; // The user-facing name (in Persian)
@@ -17,12 +15,21 @@ export interface PrizeWonEventPayload {
 	cost: number;
 }
 
-export type ICreateWonPrize = Omit<IWonPrize, "createdAt" | "updatedAt">;
-
 export interface IUserBalanceResponse {
 	balance: number;
 }
 
+export interface IPrizeWonHistory {
+	_id: string;
+	userId: string;
+	prizeId: string;
+	prizeName: string;
+	prizeDetails: Record<string, unknown>;
+	wonAt: Date;
+	cost: number;
+	createdAt: Date;
+	updatedAt: Date;
+}
 export interface ISpinWheelResponse {
 	prizeName: string;
 	prizeDetails: Record<string, unknown>;

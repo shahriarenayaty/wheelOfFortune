@@ -7,15 +7,13 @@ import { EventGateway } from "./gateways/event.gateway";
 import type { IEventGateway } from "./gateways/event.gateway";
 import { GamificationGateway } from "./gateways/gamification.gateway";
 import type { IGamificationGateway } from "./gateways/gamification.gateway";
-import { wonPrizeModel } from "./models/won-prize";
+import { HistoryGateway, type IHistoryGateway } from "./gateways/history.gateway";
 import SpinWheelUseCase from "./use-cases/spin-wheel.usecase";
-import { WheelOfFortuneRepository } from "./wheel-of-fortune.repository";
-import type { IWheelOfFortuneRepository } from "./wheel-of-fortune.repository";
 
 const { MoleculerClientError } = Errors;
 
 export default class WheelOfFortuneService extends Service {
-	private repository!: IWheelOfFortuneRepository;
+	private historyGateway!: IHistoryGateway;
 
 	private gamificationGateway!: IGamificationGateway;
 
@@ -46,7 +44,7 @@ export default class WheelOfFortuneService extends Service {
 	private async spinWheel(ctx: Context<unknown, IAuth>) {
 		this.verifyAuth(ctx);
 		const useCase = new SpinWheelUseCase({
-			repository: this.repository,
+			historyGateway: this.historyGateway,
 			gamificationGateway: this.gamificationGateway,
 			eventGateway: this.eventGateway,
 		});
@@ -62,7 +60,7 @@ export default class WheelOfFortuneService extends Service {
 
 	// --- Lifecycle Hooks ---
 	private onServiceCreated() {
-		this.repository = new WheelOfFortuneRepository(wonPrizeModel);
+		this.historyGateway = new HistoryGateway(this.broker);
 		this.gamificationGateway = new GamificationGateway(this.broker);
 		this.eventGateway = new EventGateway(this.broker);
 	}
