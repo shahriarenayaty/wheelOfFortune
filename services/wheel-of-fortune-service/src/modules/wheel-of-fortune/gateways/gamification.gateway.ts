@@ -1,9 +1,9 @@
 import { type ServiceBroker } from "moleculer";
 import type { IAuth } from "../../../common/types/auth.types";
-import type { IUserBalanceResponse } from "../wheel-of-fortune.types";
+import type { DeductPointsUseCaseResponse } from "../wheel-of-fortune.types";
 
 export interface IGamificationGateway {
-	fetchUserBalance(auth: IAuth): Promise<IUserBalanceResponse>;
+	deductPoints(pointsToDeduct: number, auth: IAuth): Promise<DeductPointsUseCaseResponse>;
 }
 
 export class GamificationGateway implements IGamificationGateway {
@@ -13,8 +13,12 @@ export class GamificationGateway implements IGamificationGateway {
 		this.broker = broker;
 	}
 
-	async fetchUserBalance(auth: IAuth): Promise<IUserBalanceResponse> {
+	async deductPoints(pointsToDeduct: number, auth: IAuth): Promise<DeductPointsUseCaseResponse> {
 		// We need to pass the meta object for authentication purposes
-		return this.broker.call("gamification.getBalance", {}, { meta: { ...auth } });
+		return this.broker.call(
+			"gamification.deductPoints",
+			{ pointsToDeduct },
+			{ meta: { ...auth } },
+		);
 	}
 }

@@ -15,8 +15,8 @@ export interface PrizeWonEventPayload {
 	cost: number;
 }
 
-export interface IUserBalanceResponse {
-	balance: number;
+export interface DeductPointsUseCaseResponse {
+	newBalance: number;
 }
 
 export interface IPrizeWonHistory {

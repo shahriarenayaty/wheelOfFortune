@@ -8,6 +8,7 @@ import { redeemedReferralModel } from "../../models/redeemed-referral";
 import GamificationRepository from "./gamification.repository";
 import type {
 	DeductPointsParams,
+	DeductPointsUseCaseResponse,
 	IAuthGateway,
 	IGamificationRepository,
 	PointsToAddParams,
@@ -102,7 +103,9 @@ export default class GamificationService extends Service {
 		});
 	}
 
-	private async handleDeductPoints(ctx: Context<DeductPointsParams, IAuth>) {
+	private async handleDeductPoints(
+		ctx: Context<DeductPointsParams, IAuth>,
+	): Promise<DeductPointsUseCaseResponse> {
 		this.verifyAuth(ctx);
 		const useCase = new DeductPointsUseCase({
 			gamificationRepository: this.gamificationRepository,

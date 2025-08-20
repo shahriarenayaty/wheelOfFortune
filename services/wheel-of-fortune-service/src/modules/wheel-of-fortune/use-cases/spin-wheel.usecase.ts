@@ -29,19 +29,6 @@ export default class SpinWheelUseCase {
 	async execute(params: IAuth): Promise<ISpinWheelResponse> {
 		const { user } = params;
 
-		// 1. Consume 1 point. This will throw an error if the user has insufficient points.
-		const { balance } = await this.gamificationGateway.fetchUserBalance(params);
-		if (balance < 1) {
-			throw new MoleculerClientError(
-				"Insufficient points to spin the wheel.",
-				400,
-				"INSUFFICIENT_POINTS",
-				{
-					userId: user.userId,
-				},
-			);
-		}
-
 		// 2. Fetch the user's prize history to determine available prizes.
 		const wonPrizes = await this.historyGateway.fetchUserPrizeWon(params);
 		const activeWonPrizeIds = new Set(
@@ -70,13 +57,16 @@ export default class SpinWheelUseCase {
 			);
 		}
 
+		// After making sure that there is a prize to win
+		// 1. Consume 1 point. This will throw an error if the user has insufficient points.
+		await this.gamificationGateway.deductPoints(1, params);
+
 		// 4. Perform the weighted random spin on the available prizes.
 		const winner = this.getWeightedRandomPrize(availablePrizes);
 
 		// 5. Generate prize details (e.g., a unique discount code).
 		const prizeDetails = winner.detailsGenerator ? winner.detailsGenerator() : {};
 
-	
 		// 6. Publish a prize.won event.
 		await this.eventGateway.publishPrizeWon({
 			userId: user.userId,
@@ -104,9 +94,7 @@ export default class SpinWheelUseCase {
 			probability: `${((p.weight / totalWeight) * 100).toFixed(2)}%`,
 		}));
 
-
-
-        // eslint-disable-next-line no-console
+		// eslint-disable-next-line no-console
 		console.table(probabilities);
 
 		for (const prize of prizes) {
