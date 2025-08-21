@@ -7,8 +7,7 @@ import {
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RedeemReferralDto } from './dto/redeem-referral.dto';
-import { GetUser } from '../auth/get-user-id.decorator';
-import { IUser } from '../auth/jwt.strategy';
+import { GetToken } from '../auth/get-token.decorator';
 
 @Controller('referrals')
 export class ReferralsController {
@@ -18,10 +17,10 @@ export class ReferralsController {
   //2- get userId from @GetUser decorator
   @Post('redeem')
   @UseGuards(JwtAuthGuard) // Protect this endpoint
-  redeem(@GetUser() user: IUser, @Body() redeemDto: RedeemReferralDto) {
+  redeem(@GetToken() token: string, @Body() redeemDto: RedeemReferralDto) {
     return this.broker.call(MoleculerActions.GAMIFICATION.REDEEM, redeemDto, {
       meta: {
-        user,
+        token,
       },
     });
   }

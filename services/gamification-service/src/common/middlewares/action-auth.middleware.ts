@@ -25,8 +25,11 @@ const ActionAuthMiddleware = {
 
 				const publicKey = await jose.importSPKI(pemPublicKey, "RS256"); // <--- The fix is here!
 
-				const c = await jose.jwtVerify<UserPayload>(token, publicKey);
-				ctx.meta.user = c.payload;
+				const decoded = await jose.jwtVerify<UserPayload>(token, publicKey);
+
+				ctx.meta.user = {
+					userId: decoded.payload.userId,
+				};
 			} catch (err) {
 				throw new MoleculerClientError("Invalid token!", 500, "INVALID_TOKEN");
 			}

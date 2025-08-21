@@ -6,8 +6,7 @@ import {
 } from '../utils/moleculer/moleculer.constants';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { GetUser } from '../auth/get-user-id.decorator';
-import { IUser } from '../auth/jwt.strategy';
+import { GetToken } from '../auth/get-token.decorator';
 
 @Controller('histories')
 export class HistoryController {
@@ -15,13 +14,13 @@ export class HistoryController {
 
   @Get('prize')
   @UseGuards(JwtAuthGuard) // Protect this endpoint
-  prize(@GetUser() user: IUser) {
+  prize(@GetToken() token: string) {
     return this.broker.call(
       MoleculerActions.HISTORY.PRIZE,
       {},
       {
         meta: {
-          user,
+          token,
         },
       },
     );

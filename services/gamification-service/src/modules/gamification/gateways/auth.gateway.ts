@@ -1,4 +1,5 @@
-import { Errors, type ServiceBroker } from "moleculer";
+import { Errors } from "moleculer";
+import type { CallingOptions, ServiceBroker } from "moleculer";
 import type { IAuthGateway, User } from "../gamification.types";
 
 const { MoleculerClientError } = Errors;
@@ -10,10 +11,16 @@ export default class AuthGateway implements IAuthGateway {
 		this.broker = broker;
 	}
 
-	async findUserByReferralCode(code: string): Promise<User | null> {
-		const owner = await this.broker.call("auth.resolveReferral", {
-			referralCode: code,
-		});
+	async findUserByReferralCode(code: string, token?: string): Promise<User | null> {
+		const callOptions: CallingOptions | undefined = token ? { meta: { token } } : undefined;
+
+		const owner = await this.broker.call(
+			"auth.resolveReferral",
+			{
+				referralCode: code,
+			},
+			callOptions,
+		);
 
 		return this.validateAndGetFirstUser(owner);
 	}

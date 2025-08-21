@@ -1,13 +1,14 @@
 import type { HydratedDocument, InferSchemaType } from "mongoose";
 import type { IAuth } from "../../common/types/user.model";
 import type { ParamsFrom } from "../../common/types/validator";
-import type pointSchema from "../../models/points/schema";
-import type redeemedReferralSchema from "../../models/redeemed-referral/schema";
 import type {
 	deductPointsValidator,
 	pointsToAddValidator,
 	redeemReferralValidator,
 } from "./gamification.validators";
+import type AuthGateway from "./gateways/auth.gateway";
+import type pointSchema from "./models/points/schema";
+import type redeemedReferralSchema from "./models/redeemed-referral/schema";
 
 // --- Points Type
 export type IPoint = InferSchemaType<typeof pointSchema>;
@@ -66,12 +67,14 @@ export interface DeductPointsUseCaseResponse {
 export interface RedeemReferralUseCaseDependencies {
 	gamificationRepository: IGamificationRepository;
 	authGateway: IAuthGateway;
+	token?: string;
 }
 
 export type RedeemReferralParams = ParamsFrom<typeof redeemReferralValidator>;
 export interface RedeemReferralUseCaseParams {
 	userId?: string;
 	code?: string;
+	token?: string;
 }
 
 export interface RedeemReferralUseCaseResponse {
@@ -81,7 +84,7 @@ export interface RedeemReferralUseCaseResponse {
 
 // --- IAuthGateway Types ----
 export interface IAuthGateway {
-	findUserByReferralCode(code: string): Promise<User | null>;
+	findUserByReferralCode(code: string, token?: string): Promise<User | null>;
 }
 
 // --- IGamificationRepository Types ----

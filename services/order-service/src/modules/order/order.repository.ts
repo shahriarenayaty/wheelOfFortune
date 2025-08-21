@@ -1,17 +1,13 @@
 import type { Model } from "mongoose";
+import { orderModel } from "../../models/order";
 import type { IOrder, OrderDocument } from "../../models/order/schema";
 import { OrderStatus } from "../../models/order/schema";
+import type { IOrderRepository } from "./order.type";
 
-export interface IOrderRepository {
-	create(userId: string, amount: number): Promise<OrderDocument>;
-	findById(orderId: string): Promise<OrderDocument | null>;
-	updateStatus(orderId: string, status: OrderStatus): Promise<OrderDocument | null>;
-}
-
-export class OrderRepository implements IOrderRepository {
+export default class OrderRepository implements IOrderRepository {
 	private orderModel: Model<IOrder>;
 
-	constructor(orderModel: Model<IOrder>) {
+	constructor() {
 		this.orderModel = orderModel;
 	}
 

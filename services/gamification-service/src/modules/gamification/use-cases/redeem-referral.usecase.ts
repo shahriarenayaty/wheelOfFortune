@@ -16,7 +16,7 @@ export default class RedeemReferralUseCase {
 
 	async execute(params: RedeemReferralUseCaseParams): Promise<RedeemReferralUseCaseResponse> {
 		const { gamificationRepository, authGateway } = this.dependencies;
-		const { userId, code } = params;
+		const { userId, code, token } = params;
 
 		// Validate input
 		if (!userId || !code) {
@@ -34,7 +34,8 @@ export default class RedeemReferralUseCase {
 		}
 
 		// 2. Find the owner of the referral code by calling the auth service
-		const owner = await authGateway.findUserByReferralCode(code);
+
+		const owner = await authGateway.findUserByReferralCode(code, token);
 
 		if (!owner) {
 			throw new MoleculerClientError("Invalid referral code.", 404, "INVALID_REFERRAL_CODE");

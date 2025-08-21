@@ -1,32 +1,15 @@
 import { Errors } from "moleculer";
+import computePoints from "../../../common/utils/calculate-points";
 import { OrderStatus } from "../../../models/order/schema";
-import type { IGamificationGateway } from "../gamification.gateway";
-import type { IOrderRepository } from "../order.repository";
-import computePoints from "../../../utils/calculate-points";
+import type {
+	PaymentResult,
+	SimulatePaymentUseCaseDependencies,
+	SimulatePaymentUseCaseParams,
+} from "../order.type";
 
 const { MoleculerClientError } = Errors;
 
-export interface SimulatePaymentUseCaseDependencies {
-	orderRepository: IOrderRepository;
-	gamificationGateway: IGamificationGateway;
-}
-
-export interface SimulatePaymentUseCaseParams {
-	orderId: string;
-	userId: string;
-	meta: object; // Pass meta for the downstream call
-}
-export interface SimulatePaymentUseCaseInputParams {
-	orderId: string;
-}
-
-interface PaymentResult {
-	success: boolean;
-	pointsEarned: number;
-	balance: number;
-}
-
-export class SimulatePaymentUseCase {
+export default class SimulatePaymentUseCase {
 	private dependencies: SimulatePaymentUseCaseDependencies;
 
 	constructor(dependencies: SimulatePaymentUseCaseDependencies) {
@@ -61,6 +44,10 @@ export class SimulatePaymentUseCase {
 	async execute(params: SimulatePaymentUseCaseParams): Promise<PaymentResult> {
 		const { orderRepository, gamificationGateway } = this.dependencies;
 		const { orderId, userId, meta } = params;
+
+		if (!orderId || !userId) {
+			throw new MoleculerClientError("Missing required parameters", 400, "MISSING_PARAMS");
+		}
 
 		// 1. Find and validate the order
 		const order = await orderRepository.findById(orderId);

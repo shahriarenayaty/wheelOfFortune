@@ -43,6 +43,7 @@ export default class AuthService extends Service {
 				},
 				// findUserByReferralCode
 				resolveReferral: {
+					authenticated: true,
 					params: resolveReferralValidator,
 					handler: this.handleResolveReferral,
 				},

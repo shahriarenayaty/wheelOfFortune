@@ -1,21 +1,11 @@
 import { type ServiceBroker } from "moleculer";
+import type {
+	GetUserPointsUseCaseResponse,
+	IGamificationGateway,
+	PointsToAddResponse,
+} from "../order.type";
 
-export interface PointsToAddResponse {
-	newBalance: number;
-}
-export interface GetUserPointsUseCaseResponse {
-	balance: number;
-}
-
-export interface IGamificationGateway {
-	publishOrderSuccessful(userId: string, purchaseAmount: number): void;
-
-	fetchUserBalance(meta: object): Promise<{ balance: number }>;
-
-	pointsToAdd(pointsToAdd: number, meta: object): Promise<PointsToAddResponse>;
-}
-
-export class GamificationGateway implements IGamificationGateway {
+export default class GamificationGateway implements IGamificationGateway {
 	private broker: ServiceBroker;
 
 	constructor(broker: ServiceBroker) {

@@ -7,8 +7,7 @@ import {
   Param,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { GetUser } from '../auth/get-user-id.decorator';
-import { IUser } from '../auth/jwt.strategy';
+import { GetToken } from '../auth/get-token.decorator';
 import { ServiceBroker } from 'moleculer';
 import {
   MoleculerActions,
@@ -23,23 +22,23 @@ export class OrderController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async createOrder(
-    @GetUser() user: IUser,
+    @GetToken() token: string,
     @Body() createOrderDto: CreateOrderDto,
   ) {
     return this.broker.call(MoleculerActions.ORDER.CREATE, createOrderDto, {
-      meta: { user },
+      meta: { token },
     });
   }
 
   @UseGuards(JwtAuthGuard)
   @Post(':orderId/payment')
   async simulatePayment(
-    @GetUser() user: IUser,
+    @GetToken() token: string,
     @Param('orderId') orderId: string,
   ) {
     const payload = { orderId };
     return this.broker.call(MoleculerActions.ORDER.PAY, payload, {
-      meta: { user },
+      meta: { token },
     });
   }
 }

@@ -6,8 +6,7 @@ import {
 } from '../utils/moleculer/moleculer.constants';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { GetUser } from '../auth/get-user-id.decorator';
-import { IUser } from '../auth/jwt.strategy';
+import { GetToken } from '../auth/get-token.decorator';
 
 @Controller('wheel')
 export class WheelController {
@@ -15,13 +14,13 @@ export class WheelController {
 
   @Post('spin')
   @UseGuards(JwtAuthGuard) // Protect this endpoint
-  spin(@GetUser() user: IUser) {
+  spin(@GetToken() token: string) {
     return this.broker.call(
       MoleculerActions.WHEEL.SPIN,
       {},
       {
         meta: {
-          user,
+          token,
         },
       },
     );

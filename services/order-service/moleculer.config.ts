@@ -1,8 +1,8 @@
 import os from "os";
 import type { BrokerOptions } from "moleculer";
 import { Errors } from "moleculer";
+import errorHandlerMiddleware from "./src/common/middlewares/errorHandler.middleware";
 import { validateEnv } from "./src/utils/config.schema";
-import errorHandlerMiddleware from "./src/utils/errorHandler.middleware";
 
 // Validate environment variables
 validateEnv(process.env);

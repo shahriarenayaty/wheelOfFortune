@@ -1,4 +1,4 @@
-import { RuleNumber, RuleString } from "fastest-validator";
+import type { RuleNumber, RuleString } from "fastest-validator";
 
 export const createOrderValidator = {
 	amount: {
