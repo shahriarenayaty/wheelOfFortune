@@ -1,18 +1,12 @@
 import type { Model } from "mongoose";
+import type { IUserRepository } from "./auth.types";
+import { userModel } from "./models/user";
 import type { IUser, UserDocument } from "./models/user/schema";
 
-export interface IUserRepository {
-	/** Finds a single user by their phone number */
-	findByPhone(phone: string): Promise<UserDocument | null>;
-
-	/** Creates a new user and returns the created entity */
-	create(data: IUser): Promise<UserDocument>;
-}
-
-export class UserRepository implements IUserRepository {
+export default class UserRepository implements IUserRepository {
 	private userModel: Model<IUser>;
 
-	constructor(userModel: Model<IUser>) {
+	constructor() {
 		this.userModel = userModel;
 	}
 

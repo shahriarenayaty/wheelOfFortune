@@ -1,4 +1,9 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["**/*.spec.ts"]
+  "exclude": ["**/*.spec.ts", "**/*.test.ts"],
+  "include": ["**/*.ts"],
+  "compilerOptions": {
+    "sourceMap": false, // Don't generate source maps for production
+    "removeComments": true
+  }
 }

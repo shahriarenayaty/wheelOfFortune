@@ -1,7 +1,7 @@
 import { Errors, Service } from "moleculer";
 import type { Context, ServiceBroker } from "moleculer";
 import mongoose from "mongoose";
-import type { IAuth } from "../../common/types/user.model";
+import type { IAuth, IUser } from "../../common/types/user.model";
 import { config } from "../../config";
 import { pointModel } from "../../models/points";
 import { redeemedReferralModel } from "../../models/redeemed-referral";
@@ -67,6 +67,7 @@ export default class GamificationService extends Service {
 			// --- Service Events ---
 			events: {
 				"user.registered": {
+					signed: true,
 					group: "gamification", // For balanced consumption
 					handler: this.onUserRegistered,
 				},
@@ -117,7 +118,7 @@ export default class GamificationService extends Service {
 	}
 
 	// --- Event Handlers ---
-	private async onUserRegistered(ctx: Context<{ userId: string }>) {
+	private async onUserRegistered(ctx: Context<IUser>) {
 		this.logger.info(`User registered event received for userId: ${ctx.params.userId}`);
 		await this.gamificationRepository.incrementBalance(ctx.params.userId, 1);
 	}

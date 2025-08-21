@@ -1,19 +1,17 @@
 import { Errors } from "moleculer";
 import { generateReferralCode, generateToken, hashPassword } from "../../../common/utils";
-import type { IUserRepository } from "../auth.repository";
-import type { RegisterUseCaseParams, RegisterUseCaseResult } from "../auth.types";
-import type { IGamificationGateway } from "../gateways/gamification.gateway";
+import type {
+	RegisterUseCaseDependencies,
+	RegisterUseCaseParams,
+	RegisterUseCaseResult,
+} from "../auth.types";
 import type { UserDocument } from "../models/user/schema";
 
 const { MoleculerClientError } = Errors;
 
 // Define the dependencies this use case needs
-export interface RegisterUseCaseDependencies {
-	userRepository: IUserRepository;
-	gamificationGateway: IGamificationGateway;
-}
 
-export class RegisterUseCase {
+export default class RegisterUseCase {
 	private dependencies: RegisterUseCaseDependencies;
 
 	constructor(dependencies: RegisterUseCaseDependencies) {

@@ -28,23 +28,24 @@ const EventAuthMiddleware = {
 
 			try {
 				// 1. Decode header to find the issuer ('iss') without full verification yet
-				const { iss } = jose.decodeProtectedHeader(jwsSignature);
-
+				const header = jose.decodeProtectedHeader(jwsSignature);
+				const iss = header?.iss;
 				if (!iss || typeof iss !== "string") {
-					throw new MoleculerError(
-						"Event JWS is missing an 'iss' (issuer) in its protected header.",
+					broker.logger.warn(
+						`Event '${event.name}' requires a JWS signature, but received an invalid 'iss' (issuer) claim. Discarding.`,
 					);
+					return;
 				}
 				if (!(iss in config)) {
-					throw new MoleculerRetryableError(
-						`Received event from unknown or untrusted issuer '${iss}'. No public key found.`,
-						500,
+					broker.logger.warn(
+						`Event '${event.name}' requires a JWS signature, but received an unknown or untrusted 'iss' (issuer) claim. Discarding.`,
 					);
+					return;
 				}
 
 				const validKey = iss as keyof EnvConfig;
 				// 2. Look up the issuer's public key from our cache
-				const pemPublicKey = config[validKey];
+				const pemPublicKey = config[validKey].replace(/\\n/g, "\n");
 
 				const publicKey = await jose.importSPKI(pemPublicKey, "RS256"); // <--- The fix is here!
 
@@ -54,8 +55,6 @@ const EventAuthMiddleware = {
 				// 4. Parse the payload and replace ctx.params
 				const verifiedPayload = JSON.parse(new TextDecoder().decode(payload));
 				ctx.params = verifiedPayload;
-
-				broker.logger.debug(`Event '${event.name}' from '${iss}' has a valid signature.`);
 
 				// 5. Call the original event handler with the now-trusted payload
 				await handler(ctx);

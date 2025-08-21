@@ -1,27 +1,21 @@
 import { Errors } from "moleculer";
 import { generateToken } from "../../../common/utils";
 import comparePassword from "../../../common/utils/compare-password";
-import type { IUserRepository } from "../auth.repository";
-import type { LoginUseCaseParams } from "../auth.types";
+import type { LoginUseCaseDependencies, LoginUseCaseParams } from "../auth.types";
 import type { UserDocument } from "../models/user/schema";
 
 const { MoleculerClientError } = Errors;
 
-// Define the dependencies this use case needs
-export interface LoginUseCaseDependencies {
-	userRepository: IUserRepository;
-}
+export default class LoginUseCase {
+	private loginUseCaseDependencies: LoginUseCaseDependencies;
 
-export class LoginUseCase {
-	private dependencies: LoginUseCaseDependencies;
-
-	constructor(dependencies: LoginUseCaseDependencies) {
-		this.dependencies = dependencies;
+	constructor(loginUseCaseDependencies: LoginUseCaseDependencies) {
+		this.loginUseCaseDependencies = loginUseCaseDependencies;
 	}
 
 	async execute(params: LoginUseCaseParams): Promise<{ token: string }> {
 		const { phone, password } = params;
-		const { userRepository } = this.dependencies;
+		const { userRepository } = this.loginUseCaseDependencies;
 
 		// 1. Find the user by their phone number
 		const user: UserDocument | null = await userRepository.findByPhone(phone);

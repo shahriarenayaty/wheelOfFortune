@@ -2,22 +2,23 @@ import type { Context, ServiceBroker } from "moleculer";
 import { Service } from "moleculer";
 import mongoose from "mongoose";
 import { config } from "../../config";
-import { UserRepository } from "./auth.repository";
+import UserRepository from "./auth.repository";
 import type {
+	IGamificationGateway,
+	IUserRepository,
 	LoginUseCaseParams,
 	RegisterUseCaseParams,
 	RegisterUseCaseResult,
 } from "./auth.types";
 import { loginValidator, registerValidator } from "./auth.validators";
-import { GamificationGateway } from "./gateways/gamification.gateway";
-import { userModel } from "./models/user";
-import { LoginUseCase } from "./use-cases/login.usecase";
-import { RegisterUseCase } from "./use-cases/register.usecase";
+import GamificationGateway from "./gateways/gamification.gateway";
+import LoginUseCase from "./use-cases/login.usecase";
+import RegisterUseCase from "./use-cases/register.usecase";
 
 export default class AuthService extends Service {
-	private userRepository!: UserRepository;
+	private userRepository!: IUserRepository;
 
-	private gamificationGateway!: GamificationGateway;
+	private gamificationGateway!: IGamificationGateway;
 
 	constructor(broker: ServiceBroker) {
 		super(broker);
@@ -67,7 +68,7 @@ export default class AuthService extends Service {
 	// --- Lifecycle Hooks ---
 
 	private onServiceCreated() {
-		this.userRepository = new UserRepository(userModel);
+		this.userRepository = new UserRepository();
 		this.gamificationGateway = new GamificationGateway(this.broker);
 	}
 
