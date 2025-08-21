@@ -1,6 +1,21 @@
-interface IUser {
-	userId: string;
+import type { Context } from "moleculer";
+
+// Type for the user payload inside a validated JWT
+export interface UserPayload {
+	userId: string; // Typically 'sub' claim in JWT
 }
-export interface IAuth {
-	user: IUser;
+
+// Extend Moleculer's Context 'meta' to include our user and token
+export interface AuthMeta {
+	user?: UserPayload;
+	token?: string;
+}
+
+// Create a typed Context for use in your actions
+export type AuthContext = Context<unknown, AuthMeta>;
+
+export interface CallingOptions {
+	meta: {
+		token: string;
+	};
 }

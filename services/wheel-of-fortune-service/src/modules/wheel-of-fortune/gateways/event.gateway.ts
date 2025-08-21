@@ -12,7 +12,7 @@ export default class EventGateway implements IEventGateway {
 
 	async publishPrizeWon(prizeWon: PrizeWonEventPayload): Promise<void> {
 		const payload: JWTPayload = { ...prizeWon };
-		const sign = generateSign(payload);
+		const sign = await generateSign(payload);
 		await this.broker.emit("prize.won", sign);
 	}
 }

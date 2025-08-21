@@ -1,15 +1,12 @@
-import { Errors, Service } from "moleculer";
+import { Service } from "moleculer";
 import type { Context, ServiceBroker } from "moleculer";
 import mongoose from "mongoose";
-import type { IAuth } from "../../common/types/auth.types";
+import type { AuthContext } from "../../common/types/auth.types";
 import { config } from "../../config";
-import { prizeHistoryModel } from "./models";
-import { type IPrizeHistoryRepository, PrizeHistoryRepository } from "./prize-history.repository";
-import type { PrizeWonParams } from "./prize-hostory.types";
-import { GetPrizeHistoryUseCase } from "./use-cases/get-prize-history.usecase";
+import PrizeHistoryRepository from "./prize-history.repository";
+import type { IPrizeHistoryRepository, PrizeWonParams } from "./prize-hostory.types";
+import GetPrizeHistoryUseCase from "./use-cases/get-prize-history.usecase";
 import SavePrizeHistoryUseCase from "./use-cases/save-prize-history.usecase";
-
-const { MoleculerClientError } = Errors;
 
 export default class PrizeHistoryService extends Service {
 	private repository!: IPrizeHistoryRepository;
@@ -23,12 +20,14 @@ export default class PrizeHistoryService extends Service {
 			actions: {
 				prize: {
 					// No params defined here, as we only need the authenticated user
+					authenticated: true,
 					handler: this.handlePrizeHistory,
 				},
 			},
 			// --- Service Events ---
 			events: {
 				"prize.won": {
+					signed: true,
 					group: "history",
 					handler: this.onPrizeWon,
 				},
@@ -42,8 +41,7 @@ export default class PrizeHistoryService extends Service {
 	}
 
 	// --- Action Handlers ---
-	private handlePrizeHistory(ctx: Context<unknown, IAuth>) {
-		this.verifyAuth(ctx);
+	private handlePrizeHistory(ctx: AuthContext) {
 		const usecase = new GetPrizeHistoryUseCase({
 			repository: this.repository,
 		});
@@ -59,16 +57,9 @@ export default class PrizeHistoryService extends Service {
 		return usecase.execute(ctx.params);
 	}
 
-	// --- Helper Methods ---
-	private verifyAuth(ctx: Context<unknown, IAuth>) {
-		if (!ctx.meta.user || !ctx.meta.user.userId) {
-			throw new MoleculerClientError("Unauthorized", 401, "UNAUTHORIZED");
-		}
-	}
-
 	// --- Lifecycle Hooks ---
 	private onServiceCreated() {
-		this.repository = new PrizeHistoryRepository(prizeHistoryModel);
+		this.repository = new PrizeHistoryRepository();
 	}
 
 	private async onServiceStarted() {

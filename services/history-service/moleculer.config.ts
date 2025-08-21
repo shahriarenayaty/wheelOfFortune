@@ -1,7 +1,9 @@
 import os from "os";
 import type { BrokerOptions } from "moleculer";
 import { Errors } from "moleculer";
+import ActionAuthMiddleware from "./src/common/middlewares/action-auth.middleware";
 import errorHandlerMiddleware from "./src/common/middlewares/errorHandler.middleware";
+import EventAuthMiddleware from "./src/common/middlewares/event-auth.middleware";
 import { config } from "./src/config";
 
 /**
@@ -191,7 +193,7 @@ const brokerConfig: BrokerOptions = {
 	},
 
 	// Register custom middlewares
-	middlewares: [errorHandlerMiddleware],
+	middlewares: [errorHandlerMiddleware, ActionAuthMiddleware, EventAuthMiddleware],
 
 	// Register custom REPL commands.
 	replCommands: null,

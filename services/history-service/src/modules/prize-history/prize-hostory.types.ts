@@ -1,4 +1,4 @@
-import type { IPrizeHistory } from "./models/schema";
+import type { IPrizeHistory, PrizeHistoryDocument } from "./models/schema";
 
 export type ICreatePrizeHistory = Omit<IPrizeHistory, "createdAt" | "updatedAt">;
 
@@ -9,4 +9,12 @@ export interface PrizeWonParams {
 	prizeDetails: Record<string, unknown>;
 	timestamp: Date;
 	cost: number;
+}
+
+export interface GetPrizeHistoryUseCaseDependencies {
+	repository: IPrizeHistoryRepository;
+}
+export interface IPrizeHistoryRepository {
+	findByUserIdSorted(userId: string): Promise<PrizeHistoryDocument[]>;
+	savePrize(prizeData: ICreatePrizeHistory): Promise<PrizeHistoryDocument>;
 }

@@ -1,16 +1,13 @@
 import type { Model } from "mongoose";
+import { prizeHistoryModel } from "./models";
 import type { IPrizeHistory, PrizeHistoryDocument } from "./models/schema";
-import type { ICreatePrizeHistory } from "./prize-hostory.types";
+import type { ICreatePrizeHistory, IPrizeHistoryRepository } from "./prize-hostory.types";
 
-export interface IPrizeHistoryRepository {
-	findByUserIdSorted(userId: string): Promise<PrizeHistoryDocument[]>;
-	savePrize(prizeData: ICreatePrizeHistory): Promise<PrizeHistoryDocument>;
-}
-export class PrizeHistoryRepository implements IPrizeHistoryRepository {
+export default class PrizeHistoryRepository implements IPrizeHistoryRepository {
 	private prizeModel: Model<IPrizeHistory>;
 
-	constructor(prizeModel: Model<IPrizeHistory>) {
-		this.prizeModel = prizeModel;
+	constructor() {
+		this.prizeModel = prizeHistoryModel;
 	}
 
 	findByUserIdSorted(userId: string): Promise<PrizeHistoryDocument[]> {

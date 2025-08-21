@@ -17,6 +17,7 @@ const ERROR_MESSAGE_MAP: Record<string, string> = {
   FORBIDDEN_ORDER: 'You do not have permission to access this order.',
   ORDER_PROCESSED: 'The order has already been processed.',
   UNAUTHORIZED: 'You are not authorized to perform this action.',
+  INSUFFICIENT_POINTS: 'You do not have enough points to perform this action.',
 };
 
 export { ERROR_MESSAGE_MAP };

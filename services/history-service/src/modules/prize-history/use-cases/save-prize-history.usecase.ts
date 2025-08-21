@@ -1,5 +1,8 @@
-import type { IPrizeHistoryRepository } from "../prize-history.repository";
-import type { ICreatePrizeHistory, PrizeWonParams } from "../prize-hostory.types";
+import type {
+	ICreatePrizeHistory,
+	IPrizeHistoryRepository,
+	PrizeWonParams,
+} from "../prize-hostory.types";
 
 interface Dependencies {
 	repository: IPrizeHistoryRepository;
