@@ -1,5 +1,9 @@
 import type { ParamsFrom } from "../../common/types/validator";
-import type { loginValidator, registerValidator } from "./auth.validators";
+import type {
+	loginValidator,
+	registerValidator,
+	resolveReferralValidator,
+} from "./auth.validators";
 import type { IUser, UserDocument } from "./models/user/schema";
 
 export type LoginUseCaseParams = ParamsFrom<typeof loginValidator>;
@@ -12,6 +16,16 @@ export type RegisterUseCaseResult = {
 	userId: string;
 };
 
+export type ResolveReferralParams = ParamsFrom<typeof resolveReferralValidator>;
+
+export type User = {
+	id: string;
+	phone: string;
+	referralCode?: string;
+};
+export type ResolveReferralUseCaseResponse = {
+	user?: User;
+};
 export interface IGamificationGateway {
 	notifyUserRegistered(userId: string): Promise<void>;
 }
@@ -19,6 +33,8 @@ export interface IGamificationGateway {
 export interface IUserRepository {
 	/** Finds a single user by their phone number */
 	findByPhone(phone: string): Promise<UserDocument | null>;
+
+	findByReferralCode(referralCode: string): Promise<UserDocument | null>;
 
 	/** Creates a new user and returns the created entity */
 	create(data: IUser): Promise<UserDocument>;
@@ -32,4 +48,8 @@ export interface LoginUseCaseDependencies {
 export interface RegisterUseCaseDependencies {
 	userRepository: IUserRepository;
 	gamificationGateway: IGamificationGateway;
+}
+
+export interface ResolveReferralUseCaseDependencies {
+	userRepository: IUserRepository;
 }

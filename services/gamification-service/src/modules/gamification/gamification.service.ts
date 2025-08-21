@@ -1,6 +1,7 @@
 import { Errors, Service } from "moleculer";
 import type { Context, ServiceBroker } from "moleculer";
 import mongoose from "mongoose";
+import type { AuthContext, AuthMeta } from "../../common/types/auth";
 import type { IAuth, IUser } from "../../common/types/user.model";
 import { config } from "../../config";
 import { pointModel } from "../../models/points";
@@ -12,7 +13,7 @@ import type {
 	IAuthGateway,
 	IGamificationRepository,
 	PointsToAddParams,
-	RedeemReferralUseCaseParams,
+	RedeemReferralParams,
 } from "./gamification.types";
 import {
 	deductPointsValidator,
@@ -76,21 +77,19 @@ export default class GamificationService extends Service {
 	}
 
 	// --- Action Handlers ---
-	private async getBalance(ctx: Context<unknown, IAuth>) {
-		this.verifyAuth(ctx);
+	private async getBalance(ctx: AuthContext) {
 		const useCase = new GetUserPointsUseCase({
 			gamificationRepository: this.gamificationRepository,
 		});
-		return useCase.execute({ userId: ctx.meta.user.userId });
+		return useCase.execute({ userId: ctx.meta.user?.userId });
 	}
 
-	private async redeemReferral(ctx: Context<RedeemReferralUseCaseParams, IAuth>) {
-		this.verifyAuth(ctx);
+	private async redeemReferral(ctx: Context<RedeemReferralParams, AuthMeta>) {
 		const useCase = new RedeemReferralUseCase({
 			gamificationRepository: this.gamificationRepository,
 			authGateway: this.authGateway,
 		});
-		return useCase.execute({ userId: ctx.meta.user.userId, code: ctx.params.code });
+		return useCase.execute({ userId: ctx.meta.user?.userId, code: ctx.params.code });
 	}
 
 	private async handlePointsToAdd(ctx: Context<PointsToAddParams, IAuth>) {

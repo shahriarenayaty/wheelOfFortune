@@ -3,7 +3,11 @@ import type { IAuth } from "../../common/types/user.model";
 import type { ParamsFrom } from "../../common/types/validator";
 import type pointSchema from "../../models/points/schema";
 import type redeemedReferralSchema from "../../models/redeemed-referral/schema";
-import type { deductPointsValidator, pointsToAddValidator } from "./gamification.validators";
+import type {
+	deductPointsValidator,
+	pointsToAddValidator,
+	redeemReferralValidator,
+} from "./gamification.validators";
 
 // --- Points Type
 export type IPoint = InferSchemaType<typeof pointSchema>;
@@ -13,6 +17,11 @@ export type PointDocument = HydratedDocument<IPoint>;
 // --- RedeemedReferral Types ----
 export type IRedeemedReferral = InferSchemaType<typeof redeemedReferralSchema>;
 export type RedeemedReferralDocument = HydratedDocument<IRedeemedReferral>;
+export type User = {
+	id: string;
+	phone: string;
+	referralCode?: string;
+};
 
 // --- PointsToAdd Types ----
 export interface PointsToAddDependencies {
@@ -33,7 +42,7 @@ export interface GetUserPointsUseCaseDependencies {
 }
 
 export interface GetUserPointsUseCaseParams {
-	userId: string;
+	userId?: string;
 }
 
 export interface GetUserPointsUseCaseResponse {
@@ -59,9 +68,10 @@ export interface RedeemReferralUseCaseDependencies {
 	authGateway: IAuthGateway;
 }
 
+export type RedeemReferralParams = ParamsFrom<typeof redeemReferralValidator>;
 export interface RedeemReferralUseCaseParams {
-	userId: string;
-	code: string;
+	userId?: string;
+	code?: string;
 }
 
 export interface RedeemReferralUseCaseResponse {
@@ -72,11 +82,6 @@ export interface RedeemReferralUseCaseResponse {
 // --- IAuthGateway Types ----
 export interface IAuthGateway {
 	findUserByReferralCode(code: string): Promise<User | null>;
-}
-
-export interface User {
-	_id: string;
-	phone: string;
 }
 
 // --- IGamificationRepository Types ----

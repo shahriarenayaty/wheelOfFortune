@@ -63,7 +63,7 @@ export default class DeductPointsUseCase {
 		const { pointsToDeduct, user } = params;
 
 		if (!user?.userId) {
-			throw new MoleculerClientError("User ID is required", 400, "INVALID_USER_ID", {
+			throw new MoleculerClientError("User ID is required", 500, "INVALID_USER_ID", {
 				userId: user?.userId,
 			});
 		}
@@ -71,7 +71,7 @@ export default class DeductPointsUseCase {
 		if (!pointsToDeduct || pointsToDeduct <= 0) {
 			throw new MoleculerClientError(
 				"Points to deduct must be a positive number",
-				400,
+				500,
 				"INVALID_POINTS_AMOUNT",
 				{ pointsToDeduct },
 			);

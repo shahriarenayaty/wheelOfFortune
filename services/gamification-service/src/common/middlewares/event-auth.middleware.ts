@@ -1,8 +1,5 @@
 import type { Context, EventSchema, ServiceEventHandler } from "moleculer";
-import { Errors } from "moleculer";
 import { config, type EnvConfig } from "../../config";
-
-const { MoleculerError, MoleculerRetryableError } = Errors;
 
 const EventAuthMiddleware = {
 	localEvent(handler: ServiceEventHandler, event: EventSchema): ServiceEventHandler {

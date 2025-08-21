@@ -26,3 +26,8 @@ export const loginValidator = {
 	password: { type: "string", min: 1 }, // A simple check that it's not empty
 	$$strict: true,
 } as const;
+
+export const resolveReferralValidator = {
+	referralCode: { type: "string", min: 1, max: 100 },
+	$$strict: true,
+} as const;

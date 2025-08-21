@@ -1,6 +1,7 @@
 import type { Context, ServiceBroker } from "moleculer";
 import { Service } from "moleculer";
 import mongoose from "mongoose";
+import type { AuthMeta } from "../../common/types/auth";
 import { config } from "../../config";
 import UserRepository from "./auth.repository";
 import type {
@@ -9,11 +10,14 @@ import type {
 	LoginUseCaseParams,
 	RegisterUseCaseParams,
 	RegisterUseCaseResult,
+	ResolveReferralParams,
+	ResolveReferralUseCaseResponse,
 } from "./auth.types";
-import { loginValidator, registerValidator } from "./auth.validators";
+import { loginValidator, registerValidator, resolveReferralValidator } from "./auth.validators";
 import GamificationGateway from "./gateways/gamification.gateway";
 import LoginUseCase from "./use-cases/login.usecase";
 import RegisterUseCase from "./use-cases/register.usecase";
+import ResolveReferralUseCase from "./use-cases/resolve-referral.usercas";
 
 export default class AuthService extends Service {
 	private userRepository!: IUserRepository;
@@ -36,6 +40,11 @@ export default class AuthService extends Service {
 				login: {
 					params: loginValidator,
 					handler: this.handleLogin,
+				},
+				// findUserByReferralCode
+				resolveReferral: {
+					params: resolveReferralValidator,
+					handler: this.handleResolveReferral,
 				},
 			},
 			// --- Service Lifecycle Hooks ---
@@ -62,6 +71,15 @@ export default class AuthService extends Service {
 			userRepository: this.userRepository,
 		});
 
+		return useCase.execute(ctx.params);
+	}
+
+	private async handleResolveReferral(
+		ctx: Context<ResolveReferralParams, AuthMeta>,
+	): Promise<ResolveReferralUseCaseResponse> {
+		const useCase = new ResolveReferralUseCase({
+			userRepository: this.userRepository,
+		});
 		return useCase.execute(ctx.params);
 	}
 

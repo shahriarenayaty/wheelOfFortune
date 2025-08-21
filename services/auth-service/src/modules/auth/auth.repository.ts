@@ -20,4 +20,8 @@ export default class UserRepository implements IUserRepository {
 		const user = await this.userModel.create(data as IUser);
 		return user;
 	}
+
+	async findByReferralCode(referralCode: string): Promise<UserDocument | null> {
+		return this.userModel.findOne({ referralCode });
+	}
 }

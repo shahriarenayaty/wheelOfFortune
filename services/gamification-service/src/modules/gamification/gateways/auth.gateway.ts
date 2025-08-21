@@ -11,11 +11,11 @@ export default class AuthGateway implements IAuthGateway {
 	}
 
 	async findUserByReferralCode(code: string): Promise<User | null> {
-		const owners: User[] = await this.broker.call("auth.find", {
-			query: { referralCode: code },
+		const owner = await this.broker.call("auth.resolveReferral", {
+			referralCode: code,
 		});
 
-		return this.validateAndGetFirstUser(owners);
+		return this.validateAndGetFirstUser(owner);
 	}
 
 	/**
@@ -27,31 +27,28 @@ export default class AuthGateway implements IAuthGateway {
 	 * @throws {MoleculerClientError} if the response is invalid.
 	 */
 	private validateAndGetFirstUser(response: unknown): User | null {
-		// Rule 1: Must be an array
-		if (!Array.isArray(response)) {
+		// Ensure response is an object and not null
+		if (!response || typeof response !== "object") {
 			throw new MoleculerClientError(
-				"Invalid response from auth service: Expected an array.",
-				502, // Bad Gateway
+				"Invalid response from auth service: Response is not an object.",
+				502,
 				"DEFAULT",
+				{ received: response },
 			);
 		}
 
-		// Rule 2: The calling function will handle the "not found" case, so we only error if the shape is wrong.
-		// If the array is empty, we let the calling function handle it.
-		if (response.length === 0) {
+		const resp = response as { user?: unknown };
+		if (!resp.user) {
 			return null;
 		}
+		const user = resp.user as Partial<User>;
 
-		const user = response[0];
-
-		// Rule 3: The first element must be a valid user object
 		if (
-			!user ||
-			typeof user !== "object" ||
-			typeof user._id !== "string" ||
-			user._id.length === 0 ||
+			typeof user.id !== "string" ||
+			user.id.length === 0 ||
 			typeof user.referralCode !== "string" ||
-			user.referralCode.length === 0
+			typeof user.phone !== "string" ||
+			user.phone.length === 0
 		) {
 			throw new MoleculerClientError(
 				"Invalid response from auth service: User object is malformed.",

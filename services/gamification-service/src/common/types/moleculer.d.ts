@@ -16,4 +16,13 @@ declare module "moleculer" {
 		 */
 		signed?: boolean;
 	}
+
+	export interface ActionSchema {
+		/**
+		 * Indicates that this action must be authenticated.
+		 * Your custom middleware can use this flag for verification.
+		 * @type {boolean}
+		 */
+		authenticated?: boolean;
+	}
 }
