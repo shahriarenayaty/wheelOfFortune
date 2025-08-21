@@ -3,6 +3,7 @@ import type { BrokerOptions } from "moleculer";
 import { Errors } from "moleculer";
 import errorHandlerMiddleware from "./src/common/middlewares/errorHandler.middleware";
 import { config } from "./src/config";
+import ActionAuthMiddleware from "./src/common/middlewares/action-auth.middleware";
 
 /**
  * Moleculer ServiceBroker configuration file
@@ -191,7 +192,7 @@ const brokerConfig: BrokerOptions = {
 	},
 
 	// Register custom middlewares
-	middlewares: [errorHandlerMiddleware],
+	middlewares: [errorHandlerMiddleware, ActionAuthMiddleware],
 
 	// Register custom REPL commands.
 	replCommands: null,

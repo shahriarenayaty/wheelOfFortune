@@ -34,3 +34,15 @@ export interface ISpinWheelResponse {
 	prizeName: string;
 	prizeDetails: Record<string, unknown>;
 }
+
+export interface IHistoryGateway {
+	fetchUserPrizeWon(token: string): Promise<IPrizeWonHistory[]>;
+}
+
+export interface IGamificationGateway {
+	deductPoints(pointsToDeduct: number, token: string): Promise<DeductPointsUseCaseResponse>;
+}
+
+export interface IEventGateway {
+	publishPrizeWon(prizeWon: PrizeWonEventPayload): Promise<void>;
+}

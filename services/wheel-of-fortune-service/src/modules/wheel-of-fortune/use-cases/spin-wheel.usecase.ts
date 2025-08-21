@@ -1,10 +1,14 @@
 import { Errors } from "moleculer";
-import type { IAuth } from "../../../common/types/auth.types";
+import type { AuthMeta } from "../../../common/types/auth.types";
 import PRIZE_POOL from "../constants/prize-pool.constants";
 import type { IEventGateway } from "../gateways/event.gateway";
-import type { IGamificationGateway } from "../gateways/gamification.gateway";
-import type { IHistoryGateway } from "../gateways/history.gateway";
-import type { IPrize, ISpinWheelResponse } from "../wheel-of-fortune.types";
+
+import type {
+	IGamificationGateway,
+	IHistoryGateway,
+	IPrize,
+	ISpinWheelResponse,
+} from "../wheel-of-fortune.types";
 
 const { MoleculerClientError } = Errors;
 interface Dependencies {
@@ -26,11 +30,19 @@ export default class SpinWheelUseCase {
 		this.eventGateway = dependencies.eventGateway;
 	}
 
-	async execute(params: IAuth): Promise<ISpinWheelResponse> {
-		const { user } = params;
+	async execute(params: AuthMeta): Promise<ISpinWheelResponse> {
+		const { token, user } = params;
+
+		if (!token || !user) {
+			throw new MoleculerClientError(
+				"Missing authentication information",
+				500,
+				"MISSING_AUTH_INFO",
+			);
+		}
 
 		// 2. Fetch the user's prize history to determine available prizes.
-		const wonPrizes = await this.historyGateway.fetchUserPrizeWon(params);
+		const wonPrizes = await this.historyGateway.fetchUserPrizeWon(token);
 		const activeWonPrizeIds = new Set(
 			wonPrizes
 				.map((p) => p.prizeId)
@@ -59,7 +71,7 @@ export default class SpinWheelUseCase {
 
 		// After making sure that there is a prize to win
 		// 1. Consume 1 point. This will throw an error if the user has insufficient points.
-		await this.gamificationGateway.deductPoints(1, params);
+		await this.gamificationGateway.deductPoints(1, token);
 
 		// 4. Perform the weighted random spin on the available prizes.
 		const winner = this.getWeightedRandomPrize(availablePrizes);

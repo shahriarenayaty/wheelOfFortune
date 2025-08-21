@@ -1,10 +1,6 @@
 import { type ServiceBroker } from "moleculer";
-import type { IAuth } from "../../../common/types/auth.types";
-import type { IPrizeWonHistory } from "../wheel-of-fortune.types";
-
-export interface IHistoryGateway {
-	fetchUserPrizeWon(auth: IAuth): Promise<IPrizeWonHistory[]>;
-}
+import type { IHistoryGateway, IPrizeWonHistory } from "../wheel-of-fortune.types";
+import { CallingOptions } from "../../../common/types/auth.types";
 
 export class HistoryGateway implements IHistoryGateway {
 	private broker: ServiceBroker;
@@ -13,8 +9,9 @@ export class HistoryGateway implements IHistoryGateway {
 		this.broker = broker;
 	}
 
-	async fetchUserPrizeWon(auth: IAuth): Promise<IPrizeWonHistory[]> {
+	async fetchUserPrizeWon(token: string): Promise<IPrizeWonHistory[]> {
 		// We need to pass the meta object for authentication purposes
-		return this.broker.call("history.prize", {}, { meta: { ...auth } });
+		const optional: CallingOptions = { meta: { token } };
+		return this.broker.call("history.prize", {}, optional);
 	}
 }

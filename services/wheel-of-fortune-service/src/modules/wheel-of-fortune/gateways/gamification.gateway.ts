@@ -1,10 +1,6 @@
 import { type ServiceBroker } from "moleculer";
-import type { IAuth } from "../../../common/types/auth.types";
-import type { DeductPointsUseCaseResponse } from "../wheel-of-fortune.types";
-
-export interface IGamificationGateway {
-	deductPoints(pointsToDeduct: number, auth: IAuth): Promise<DeductPointsUseCaseResponse>;
-}
+import type { DeductPointsUseCaseResponse, IGamificationGateway } from "../wheel-of-fortune.types";
+import { CallingOptions } from "../../../common/types/auth.types";
 
 export class GamificationGateway implements IGamificationGateway {
 	private broker: ServiceBroker;
@@ -13,12 +9,12 @@ export class GamificationGateway implements IGamificationGateway {
 		this.broker = broker;
 	}
 
-	async deductPoints(pointsToDeduct: number, auth: IAuth): Promise<DeductPointsUseCaseResponse> {
+	async deductPoints(
+		pointsToDeduct: number,
+		token: string,
+	): Promise<DeductPointsUseCaseResponse> {
 		// We need to pass the meta object for authentication purposes
-		return this.broker.call(
-			"gamification.deductPoints",
-			{ pointsToDeduct },
-			{ meta: { ...auth } },
-		);
+		const optional: CallingOptions = { meta: { token } };
+		return this.broker.call("gamification.deductPoints", { pointsToDeduct }, optional);
 	}
 }

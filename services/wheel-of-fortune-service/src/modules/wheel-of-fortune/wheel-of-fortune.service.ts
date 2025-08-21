@@ -1,14 +1,14 @@
 import { Errors, Service } from "moleculer";
 import type { Context, ServiceBroker } from "moleculer";
 import mongoose from "mongoose";
-import type { IAuth } from "../../common/types/auth.types";
 import { config } from "../../config";
 import { EventGateway } from "./gateways/event.gateway";
 import type { IEventGateway } from "./gateways/event.gateway";
 import { GamificationGateway } from "./gateways/gamification.gateway";
-import type { IGamificationGateway } from "./gateways/gamification.gateway";
-import { HistoryGateway, type IHistoryGateway } from "./gateways/history.gateway";
+import { HistoryGateway } from "./gateways/history.gateway";
 import SpinWheelUseCase from "./use-cases/spin-wheel.usecase";
+import { AuthContext } from "../../common/types/auth.types";
+import { IGamificationGateway, IHistoryGateway } from "./wheel-of-fortune.types";
 
 const { MoleculerClientError } = Errors;
 
@@ -27,6 +27,7 @@ export default class WheelOfFortuneService extends Service {
 			actions: {
 				spin: {
 					// No params defined here, as we only need the authenticated user
+					authenticated: true,
 					handler: this.spinWheel,
 				},
 			},
@@ -41,21 +42,13 @@ export default class WheelOfFortuneService extends Service {
 	 * into a command for the use case.
 	 */
 	// --- Action Handlers ---
-	private async spinWheel(ctx: Context<unknown, IAuth>) {
-		this.verifyAuth(ctx);
+	private async spinWheel(ctx: AuthContext) {
 		const useCase = new SpinWheelUseCase({
 			historyGateway: this.historyGateway,
 			gamificationGateway: this.gamificationGateway,
 			eventGateway: this.eventGateway,
 		});
 		return useCase.execute(ctx.meta);
-	}
-
-	// --- Helper Methods ---
-	private verifyAuth(ctx: Context<any, any>) {
-		if (!ctx.meta.user || !ctx.meta.user.userId) {
-			throw new MoleculerClientError("Unauthorized", 401, "UNAUTHORIZED");
-		}
 	}
 
 	// --- Lifecycle Hooks ---
