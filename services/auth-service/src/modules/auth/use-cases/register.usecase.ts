@@ -46,7 +46,7 @@ export class RegisterUseCase {
 		});
 
 		// 4. Generate a JWT
-		const token = generateToken(user);
+		const token = await generateToken(user);
 
 		// 5. Notify the gamification service and reward the user
 		await this.dependencies.gamificationGateway.notifyUserRegistered(user._id.toString());

@@ -70,6 +70,8 @@ jspm_packages/
 
 # Environment files
 .env
+*.pem
+
 
 # Framework outputs
 .next

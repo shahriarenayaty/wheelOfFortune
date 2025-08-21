@@ -48,7 +48,7 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "fastest-validator": "^1.19.1",
-    "jsonwebtoken": "^9.0.2",
+    "jose": "^6.0.12",
     "moleculer": "^0.14.27",
     "moleculer-db": "^0.8.29",
     "moleculer-db-adapter-mongo": "^0.4.16",
@@ -59,6 +59,6 @@
     "zod": "^4.0.17"
   },
   "engines": {
-    "node": ">= 16.x.x"
+    "node": ">=20.19.0" 
   }
 }

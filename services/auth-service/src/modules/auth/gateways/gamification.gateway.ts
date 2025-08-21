@@ -1,4 +1,6 @@
 import { type ServiceBroker } from "moleculer";
+import generateSign from "../../../common/utils/generate-sign";
+import { config } from "../../../config";
 
 export interface IGamificationGateway {
 	notifyUserRegistered(userId: string): Promise<void>;
@@ -12,6 +14,8 @@ export class GamificationGateway implements IGamificationGateway {
 	}
 
 	async notifyUserRegistered(userId: string): Promise<void> {
-		await this.broker.emit("user.registered", { userId });
+		const sign = await generateSign({ userId });
+
+		await this.broker.emit("user.registered", { jws: sign });
 	}
 }

@@ -1,5 +1,5 @@
 import type { Context, ServiceBroker } from "moleculer";
-import { Errors, Service } from "moleculer";
+import { Service } from "moleculer";
 import mongoose from "mongoose";
 import { config } from "../../config";
 import { UserRepository } from "./auth.repository";

@@ -26,7 +26,7 @@ export class CreateOrderUseCase {
 		return {
 			orderId: newOrder._id.toString(),
 			status: newOrder.status,
-			amount: newOrder.amount,
+			amount: newOrder.amountInToman,
 		};
 	}
 }

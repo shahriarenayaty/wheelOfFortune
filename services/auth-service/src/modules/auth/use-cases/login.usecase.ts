@@ -43,7 +43,7 @@ export class LoginUseCase {
 		}
 
 		// 3. If credentials are valid, generate a JWT
-		const token = generateToken(user);
+		const token = await generateToken(user);
 
 		// 4. Return the token
 		return { token };
