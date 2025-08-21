@@ -6,7 +6,6 @@ import type {
 	pointsToAddValidator,
 	redeemReferralValidator,
 } from "./gamification.validators";
-import type AuthGateway from "./gateways/auth.gateway";
 import type pointSchema from "./models/points/schema";
 import type redeemedReferralSchema from "./models/redeemed-referral/schema";
 

@@ -43,9 +43,9 @@ export default class SimulatePaymentUseCase {
 	 */
 	async execute(params: SimulatePaymentUseCaseParams): Promise<PaymentResult> {
 		const { orderRepository, gamificationGateway } = this.dependencies;
-		const { orderId, userId, meta } = params;
+		const { orderId, userId, token } = params;
 
-		if (!orderId || !userId) {
+		if (!orderId || !userId || !token) {
 			throw new MoleculerClientError("Missing required parameters", 400, "MISSING_PARAMS");
 		}
 
@@ -72,10 +72,10 @@ export default class SimulatePaymentUseCase {
 		// 4. If points are earned, call the gamification service to add points
 		// And if not, fetch the user's current balance
 		if (pointsEarned > 0) {
-			const pointsToAddResponse = await gamificationGateway.pointsToAdd(pointsEarned, meta);
+			const pointsToAddResponse = await gamificationGateway.pointsToAdd(pointsEarned, token);
 			balance = pointsToAddResponse.newBalance;
 		} else {
-			const balanceResponse = await gamificationGateway.fetchUserBalance(meta);
+			const balanceResponse = await gamificationGateway.fetchUserBalance(token);
 			balance = balanceResponse.balance;
 		}
 

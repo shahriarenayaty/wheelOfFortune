@@ -57,11 +57,13 @@ export default class GamificationService extends Service {
 				},
 				pointsToAdd: {
 					// userId comes from authenticated context
+					authenticated: true,
 					params: pointsToAddValidator,
 					handler: this.handlePointsToAdd,
 				},
 				deductPoints: {
 					// userId comes from authenticated context
+					authenticated: true,
 					params: deductPointsValidator,
 					handler: this.handleDeductPoints,
 				},

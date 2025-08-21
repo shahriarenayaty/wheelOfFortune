@@ -1,9 +1,11 @@
 import { type ServiceBroker } from "moleculer";
+import type { CallingOptions } from "../../../common/types/auth";
 import type {
 	GetUserPointsUseCaseResponse,
 	IGamificationGateway,
 	PointsToAddResponse,
 } from "../order.type";
+import generateSign from "../../../common/utils/generate-sign";
 
 export default class GamificationGateway implements IGamificationGateway {
 	private broker: ServiceBroker;
@@ -13,17 +15,22 @@ export default class GamificationGateway implements IGamificationGateway {
 	}
 
 	async publishOrderSuccessful(userId: string, purchaseAmount: number): Promise<void> {
-		await this.broker.emit("order.successful", { userId, purchaseAmount });
+		const sign = await generateSign({ userId, purchaseAmount });
+		await this.broker.emit("order.successful", sign);
 	}
 
-	async fetchUserBalance(meta: object): Promise<GetUserPointsUseCaseResponse> {
+	async fetchUserBalance(token: string): Promise<GetUserPointsUseCaseResponse> {
+		const callOptions: CallingOptions = { meta: { token } };
+
 		// We need to pass the meta object for authentication purposes
-		return this.broker.call("gamification.getBalance", {}, { meta });
+		return this.broker.call("gamification.getBalance", {}, callOptions);
 	}
 
-	async pointsToAdd(pointsToAdd: number, meta: object): Promise<PointsToAddResponse> {
+	async pointsToAdd(pointsToAdd: number, token: string): Promise<PointsToAddResponse> {
+		const callOptions: CallingOptions = { meta: { token } };
+
 		try {
-			return await this.broker.call("gamification.addPoints", { pointsToAdd }, { meta });
+			return await this.broker.call("gamification.pointsToAdd", { pointsToAdd }, callOptions);
 		} catch (error) {
 			return {
 				newBalance: -1,

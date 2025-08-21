@@ -4,7 +4,7 @@ import type { createOrderValidator, paymentValidator } from "./order.validators"
 
 // --- Repository
 export interface IOrderRepository {
-	create(userId: string, amount: number): Promise<OrderDocument>;
+	create(userId: string, amountInToman: number): Promise<OrderDocument>;
 	findById(orderId: string): Promise<OrderDocument | null>;
 	updateStatus(orderId: string, status: OrderStatus): Promise<OrderDocument | null>;
 }
@@ -13,9 +13,9 @@ export interface IOrderRepository {
 export interface IGamificationGateway {
 	publishOrderSuccessful(userId: string, purchaseAmount: number): void;
 
-	fetchUserBalance(meta: object): Promise<{ balance: number }>;
+	fetchUserBalance(token?: string): Promise<{ balance: number }>;
 
-	pointsToAdd(pointsToAdd: number, meta: object): Promise<PointsToAddResponse>;
+	pointsToAdd(pointsToAdd: number, token?: string): Promise<PointsToAddResponse>;
 }
 
 export interface PointsToAddResponse {
@@ -32,7 +32,7 @@ export interface CreateOrderUseCaseDependencies {
 }
 
 export interface CreateOrderUseCaseParams {
-	amount?: number;
+	amountInToman?: number;
 	userId?: string;
 }
 
@@ -40,7 +40,7 @@ export type CreateOrderParams = ParamsFrom<typeof createOrderValidator>;
 export interface CreateOrderUseCaseResult {
 	orderId: string;
 	status: string;
-	amount: number;
+	amountInToman: number;
 }
 
 // --- Simulate Payment
@@ -52,7 +52,7 @@ export interface SimulatePaymentUseCaseDependencies {
 export interface SimulatePaymentUseCaseParams {
 	orderId?: string;
 	userId?: string;
-	meta?: object; // Pass meta for the downstream call
+	token?: string;
 }
 export type SimulatePaymentParams = ParamsFrom<typeof paymentValidator>;
 

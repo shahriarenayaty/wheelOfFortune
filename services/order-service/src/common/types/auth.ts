@@ -13,3 +13,9 @@ export interface AuthMeta {
 
 // Create a typed Context for use in your actions
 export type AuthContext = Context<unknown, AuthMeta>;
+
+export interface CallingOptions {
+	meta: {
+		token: string;
+	};
+}

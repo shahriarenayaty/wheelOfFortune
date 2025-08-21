@@ -26,10 +26,12 @@ export default class OrderService extends Service {
 
 			actions: {
 				create: {
+					authenticated: true,
 					params: createOrderValidator,
 					handler: this.createOrder,
 				},
 				pay: {
+					authenticated: true,
 					params: paymentValidator,
 					handler: this.simulatePayment,
 				},
@@ -43,7 +45,7 @@ export default class OrderService extends Service {
 			orderRepository: this.orderRepository,
 		});
 		return useCase.execute({
-			amount: ctx.params.amount,
+			amountInToman: ctx.params.amountInToman,
 			userId: ctx.meta.user?.userId,
 		});
 	}
@@ -56,7 +58,7 @@ export default class OrderService extends Service {
 		return useCase.execute({
 			orderId: ctx.params.orderId,
 			userId: ctx.meta.user?.userId,
-			meta: ctx.meta, // Pass the whole meta object
+			token: ctx.meta.token,
 		});
 	}
 

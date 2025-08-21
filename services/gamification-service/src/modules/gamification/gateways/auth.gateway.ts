@@ -1,5 +1,6 @@
 import { Errors } from "moleculer";
-import type { CallingOptions, ServiceBroker } from "moleculer";
+import type { ServiceBroker } from "moleculer";
+import type { CallingOptions } from "../../../common/types/auth";
 import type { IAuthGateway, User } from "../gamification.types";
 
 const { MoleculerClientError } = Errors;

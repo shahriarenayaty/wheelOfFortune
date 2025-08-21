@@ -4,7 +4,7 @@
   "description": "My Moleculer-based microservices project",
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
-    "dev": "ts-node -r dotenv/config  ./node_modules/moleculer/bin/moleculer-runner.js --config moleculer.config.ts --hot --repl src/services/**/*.service.ts",
+    "dev": "ts-node -r dotenv/config  ./node_modules/moleculer/bin/moleculer-runner.js --config moleculer.config.ts --hot --repl src/**/*.service.ts",
     "start": "moleculer-runner --config dist/moleculer.config.js",
     "test:types": "concurrently npm:prettier npm:lint npm:typecheck",
     "typecheck": "tsc --noEmit && echo \"tsc: no typecheck errors\"",
@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "fastest-validator": "^1.19.1",
+    "jose": "^6.0.13",
     "moleculer": "^0.14.27",
     "mongoose": "^8.17.2",
     "nats": "^2.7.1",

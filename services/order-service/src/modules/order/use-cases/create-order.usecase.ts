@@ -15,16 +15,16 @@ export default class CreateOrderUseCase {
 	}
 
 	async execute(params: CreateOrderUseCaseParams): Promise<CreateOrderUseCaseResult> {
-		const { userId, amount } = params;
-		if (!userId || !amount) {
+		const { userId, amountInToman } = params;
+		if (!userId || !amountInToman) {
 			throw new MoleculerClientError("Missing required parameters", 500, "CREATE_ORDER");
 		}
 		const { orderRepository } = this.dependencies;
-		const newOrder = await orderRepository.create(userId, amount);
+		const newOrder = await orderRepository.create(userId, amountInToman);
 		return {
 			orderId: newOrder._id.toString(),
 			status: newOrder.status,
-			amount: newOrder.amountInToman,
+			amountInToman: newOrder.amountInToman,
 		};
 	}
 }

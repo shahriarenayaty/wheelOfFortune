@@ -6,6 +6,8 @@ const configSchema = z.object({
 	NODE_ID_PREFIX: z.string(),
 	MONGO_URI: z.string(),
 	PRIVATE_KEY: z.string().startsWith("-----BEGIN PRIVATE KEY-----"),
+	AUTH_PUBLIC_KEY: z.string().startsWith("-----BEGIN PUBLIC KEY-----"),
+	ISS_JWS: z.string(),
 });
 
 export type EnvConfig = z.infer<typeof configSchema>;

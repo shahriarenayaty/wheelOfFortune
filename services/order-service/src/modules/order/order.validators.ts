@@ -1,7 +1,7 @@
 import type { RuleNumber, RuleString } from "fastest-validator";
 
 export const createOrderValidator = {
-	amount: {
+	amountInToman: {
 		type: "number",
 		positive: true,
 		integer: true,

@@ -1,8 +1,8 @@
 import type { Model } from "mongoose";
-import { orderModel } from "../../models/order";
 import type { IOrder, OrderDocument } from "../../models/order/schema";
 import { OrderStatus } from "../../models/order/schema";
 import type { IOrderRepository } from "./order.type";
+import { orderModel } from "../../models/order";
 
 export default class OrderRepository implements IOrderRepository {
 	private orderModel: Model<IOrder>;
@@ -11,8 +11,8 @@ export default class OrderRepository implements IOrderRepository {
 		this.orderModel = orderModel;
 	}
 
-	create(userId: string, amount: number): Promise<OrderDocument> {
-		return this.orderModel.create({ userId, amount, status: OrderStatus.PENDING });
+	create(userId: string, amountInToman: number): Promise<OrderDocument> {
+		return this.orderModel.create({ userId, amountInToman, status: OrderStatus.PENDING });
 	}
 
 	findById(orderId: string): Promise<OrderDocument | null> {
