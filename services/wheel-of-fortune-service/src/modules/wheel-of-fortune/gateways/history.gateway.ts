@@ -1,8 +1,8 @@
 import { type ServiceBroker } from "moleculer";
+import type { CallingOptions } from "../../../common/types/auth.types";
 import type { IHistoryGateway, IPrizeWonHistory } from "../wheel-of-fortune.types";
-import { CallingOptions } from "../../../common/types/auth.types";
 
-export class HistoryGateway implements IHistoryGateway {
+export default class HistoryGateway implements IHistoryGateway {
 	private broker: ServiceBroker;
 
 	constructor(broker: ServiceBroker) {

@@ -1,8 +1,8 @@
 import { type ServiceBroker } from "moleculer";
+import type { CallingOptions } from "../../../common/types/auth.types";
 import type { DeductPointsUseCaseResponse, IGamificationGateway } from "../wheel-of-fortune.types";
-import { CallingOptions } from "../../../common/types/auth.types";
 
-export class GamificationGateway implements IGamificationGateway {
+export default class GamificationGateway implements IGamificationGateway {
 	private broker: ServiceBroker;
 
 	constructor(broker: ServiceBroker) {

@@ -1,16 +1,17 @@
-import { Errors, Service } from "moleculer";
-import type { Context, ServiceBroker } from "moleculer";
+import { Service } from "moleculer";
+import type { ServiceBroker } from "moleculer";
 import mongoose from "mongoose";
+import type { AuthContext } from "../../common/types/auth.types";
 import { config } from "../../config";
-import { EventGateway } from "./gateways/event.gateway";
-import type { IEventGateway } from "./gateways/event.gateway";
-import { GamificationGateway } from "./gateways/gamification.gateway";
-import { HistoryGateway } from "./gateways/history.gateway";
+import EventGateway from "./gateways/event.gateway";
+import GamificationGateway from "./gateways/gamification.gateway";
+import HistoryGateway from "./gateways/history.gateway";
 import SpinWheelUseCase from "./use-cases/spin-wheel.usecase";
-import { AuthContext } from "../../common/types/auth.types";
-import { IGamificationGateway, IHistoryGateway } from "./wheel-of-fortune.types";
-
-const { MoleculerClientError } = Errors;
+import type {
+	IEventGateway,
+	IGamificationGateway,
+	IHistoryGateway,
+} from "./wheel-of-fortune.types";
 
 export default class WheelOfFortuneService extends Service {
 	private historyGateway!: IHistoryGateway;

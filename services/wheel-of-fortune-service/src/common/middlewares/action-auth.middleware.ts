@@ -1,7 +1,7 @@
 import type { ActionHandler, ActionSchema } from "moleculer";
 import { Errors } from "moleculer";
 import { config } from "../../config";
-import { AuthContext, UserPayload } from "../types/auth.types";
+import type { AuthContext, UserPayload } from "../types/auth.types";
 
 const { MoleculerClientError } = Errors;
 

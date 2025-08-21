@@ -1,9 +1,8 @@
 import { Errors } from "moleculer";
 import type { AuthMeta } from "../../../common/types/auth.types";
 import PRIZE_POOL from "../constants/prize-pool.constants";
-import type { IEventGateway } from "../gateways/event.gateway";
-
 import type {
+	IEventGateway,
 	IGamificationGateway,
 	IHistoryGateway,
 	IPrize,
