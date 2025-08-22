@@ -1,20 +1,33 @@
 # syntax=docker/dockerfile:1
 ARG NODE_VERSION=22.18
-FROM node:${NODE_VERSION}-alpine AS deps
+
+
+FROM node:${NODE_VERSION}-alpine AS builder
 WORKDIR /app
-ENV NODE_ENV=development
-COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
-RUN if [ -f package-lock.json ]; then npm ci; \
-    elif [ -f yarn.lock ]; then yarn install; \
-    elif [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm i; \
-    else npm i; fi
+
+COPY package.json package-lock.json* ./
+RUN npm ci
+
 COPY . .
-RUN npm run build || :
+
+RUN npm run build
+
 
 FROM node:${NODE_VERSION}-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=deps /app .
+
+RUN apk add --no-cache openssl
+
+# Copy production dependencies from the builder stage
+COPY --from=builder /app/package.json /app/package-lock.json* ./
+RUN npm ci --omit=dev
+
+
+# Copy the compiled application code from the builder stage
+COPY --from=builder /app/dist ./dist
+
+
 
 COPY <<'EOF' /entrypoint.sh
 #!/bin/sh
@@ -24,9 +37,11 @@ mkdir -p /shared/keys
 PRIV_FILE="/shared/keys/wheel_private.pem"
 PUB_FILE="/shared/keys/wheel_public.pem"
 if [ ! -f "$PRIV_FILE" ] || [ ! -f "$PUB_FILE" ]; then
+  echo "Generating new RSA key pair for wheel..."
   openssl genrsa -out "$PRIV_FILE" 2048 2>/dev/null
   openssl rsa -in "$PRIV_FILE" -pubout -out "$PUB_FILE" 2>/dev/null
   chmod 600 "$PRIV_FILE" && chmod 644 "$PUB_FILE"
+  echo "Key pair generated."
 fi
 if [ -z "${PRIVATE_KEY}" ] && [ -f "$PRIV_FILE" ]; then
   export PRIVATE_KEY="$(awk 'NF {sub(/\r/, ""); printf "%s\\n", $0; }' "$PRIV_FILE")"
@@ -38,12 +53,13 @@ fi
 AUTH_PUB="/shared/keys/auth_public.pem"
 for i in $(seq 1 60); do
   if [ -f "$AUTH_PUB" ]; then break; fi
+  echo "Waiting for public key at $AUTH_PUB in wheel-of-fortune-service... ($i/60)"
   sleep 1
 done
 if [ -z "${AUTH_PUBLIC_KEY}" ] && [ -f "$AUTH_PUB" ]; then
   export AUTH_PUBLIC_KEY="$(awk 'NF {sub(/\r/, ""); printf "%s\\n", $0; }' "$AUTH_PUB")"
 fi
-node -r ts-node/register -r dotenv/config ./node_modules/moleculer/bin/moleculer-runner.js --config moleculer.config.ts src/**/*.service.ts
+node ./node_modules/moleculer/bin/moleculer-runner.js --config dist/moleculer.config.js dist/**/*.service.js
 EOF
 RUN chmod +x /entrypoint.sh
 CMD ["/entrypoint.sh"]
