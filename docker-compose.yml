@@ -1,0 +1,147 @@
+version: "3.9"
+
+services:
+  nats:
+    image: nats:2.10
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: |
+        mongosh --host localhost --port 27017 --eval \
+        'db.runCommand("ping").ok'
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+      args:
+        - NODE_VERSION=22.18
+    environment:
+      - NATS_URL=nats://nats:4222
+      - NAMESPACE=wheelOfFortune
+      - NODE_ID_PREFIX=gateway
+      # PUBLIC_KEY will be populated from mounted file by entrypoint if not set
+    volumes:
+      - keys-data:/shared/keys
+    depends_on:
+      - nats
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+      args:
+        - NODE_VERSION=22.18
+    environment:
+      - NATS_URL=nats://nats:4222
+      - NAMESPACE=wheelOfFortune
+      - NODE_ID_PREFIX=AUTH
+      - MONGO_URI=mongodb://mongodb:27017/wheelOfFortune
+      - ISS_JWS=AUTH_PUBLIC_KEY
+      # PRIVATE_KEY & AUTH_PUBLIC_KEY populated by entrypoint from mounted files
+    volumes:
+      - keys-data:/shared/keys
+    depends_on:
+      - nats
+      - mongodb
+    restart: unless-stopped
+
+  # order-service:
+  #   build:
+  #     context: ./services/order-service
+  #     dockerfile: Dockerfile
+  #     args:
+  #       - NODE_VERSION=22.18
+  #   environment:
+  #     - NATS_URL=nats://nats:4222
+  #     - NAMESPACE=wheelOfFortune
+  #     - NODE_ID_PREFIX=ORDER
+  #     - MONGO_URI=mongodb://mongodb:27018/wheelOfFortune
+  #     - ISS_JWS=ORDER_PUBLIC_KEY
+  #     # PRIVATE_KEY & AUTH_PUBLIC_KEY populated by entrypoint
+  #   volumes:
+  #     - keys-data:/shared/keys
+  #   depends_on:
+  #     - nats
+  #     - mongodb
+  #   restart: unless-stopped
+
+  # gamification-service:
+  #   build:
+  #     context: ./services/gamification-service
+  #     dockerfile: Dockerfile
+  #     args:
+  #       - NODE_VERSION=22.18
+  #   environment:
+  #     - NATS_URL=nats://nats:4222
+  #     - NAMESPACE=wheelOfFortune
+  #     - NODE_ID_PREFIX=GAMIFICATION
+  #     - MONGO_URI=mongodb://mongodb:27018/wheelOfFortune
+  #     # AUTH_PUBLIC_KEY populated by entrypoint
+  #   volumes:
+  #     - keys-data:/shared/keys
+  #   depends_on:
+  #     - nats
+  #     - mongodb
+  #   restart: unless-stopped
+
+  # history-service:
+  #   build:
+  #     context: ./services/history-service
+  #     dockerfile: Dockerfile
+  #     args:
+  #       - NODE_VERSION=22.18
+  #   environment:
+  #     - NATS_URL=nats://nats:4222
+  #     - NAMESPACE=wheelOfFortune
+  #     - NODE_ID_PREFIX=HISTORY
+  #     - MONGO_URI=mongodb://mongodb:27018/wheelOfFortune
+  #     # AUTH_PUBLIC_KEY & WHEEL_PUBLIC_KEY populated by entrypoint
+  #   volumes:
+  #     - keys-data:/shared/keys
+  #   depends_on:
+  #     - nats
+  #     - mongodb
+  #   restart: unless-stopped
+
+  # wheel-of-fortune-service:
+  #   build:
+  #     context: ./services/wheel-of-fortune-service
+  #     dockerfile: Dockerfile
+  #     args:
+  #       - NODE_VERSION=22.18
+  #   environment:
+  #     - NATS_URL=nats://nats:4222
+  #     - NAMESPACE=wheelOfFortune
+  #     - NODE_ID_PREFIX=WHEEL
+  #     - MONGO_URI=mongodb://mongodb:27018/wheelOfFortune
+  #     - ISS_JWS=WHEEL_PUBLIC_KEY
+  #     # PRIVATE_KEY & AUTH_PUBLIC_KEY populated by entrypoint
+  #   volumes:
+  #     - keys-data:/shared/keys
+  #   depends_on:
+  #     - nats
+  #     - mongodb
+  #   restart: unless-stopped
+
+volumes:
+  mongo-data:
+  keys-data:
