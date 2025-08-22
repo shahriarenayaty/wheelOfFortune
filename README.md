@@ -33,30 +33,31 @@ The system is composed of several independent microservices that communicate wit
 
 ### System Diagram
 
+
 ```mermaid
 graph TD
-    A[Client App] --> B{API Gateway (NestJS)};
+    A[Client App] --> B{API Gateway (NestJS)}
 
     subgraph "Services"
-        B --> C[Auth Service];
-        B --> D[Order Service];
-        B --> E[Gamification Service];
-        B --> F[Wheel of Fortune Service];
-        B --> G[History Service];
+        B --> C[Auth Service]
+        B --> D[Order Service]
+        B --> E[Gamification Service]
+        B --> F[Wheel of Fortune Service]
+        B --> G[History Service]
     end
 
     subgraph "Event Bus (NATS)"
         direction LR
-        C -- "user.registered" --> E;
-        F -- "prize.won" --> G;
+        C -- "user.registered" --> E
+        F -- "prize.won" --> G
     end
 
     subgraph "Database (MongoDB)"
-        C --> H{DB};
-        D --> H;
-        E --> H;
-        F --> H;
-        G --> H;
+        C --> H{DB}
+        D --> H
+        E --> H
+        F --> H
+        G --> H
     end
 ```
 
