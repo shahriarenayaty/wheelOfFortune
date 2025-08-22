@@ -1,33 +1,47 @@
 # syntax=docker/dockerfile:1
 ARG NODE_VERSION=22.18
-FROM node:${NODE_VERSION}-alpine AS deps
+
+
+FROM node:${NODE_VERSION}-alpine AS builder
 WORKDIR /app
-ENV NODE_ENV=development
-COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
-RUN if [ -f package-lock.json ]; then npm ci; \
-    elif [ -f yarn.lock ]; then yarn install; \
-    elif [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm i; \
-    else npm i; fi
+
+COPY package.json package-lock.json* ./
+RUN npm ci
+
 COPY . .
-RUN npm run build || :
+
+RUN npm run build
+
 
 FROM node:${NODE_VERSION}-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=deps /app .
+
+RUN apk add --no-cache openssl
+
+# Copy production dependencies from the builder stage
+COPY --from=builder /app/package.json /app/package-lock.json* ./
+RUN npm ci --omit=dev
+
+
+# Copy the compiled application code from the builder stage
+COPY --from=builder /app/dist ./dist
+
 
 COPY <<'EOF' /entrypoint.sh
 #!/bin/sh
 set -e
-AUTH_PUB="/shared/keys/auth_public.pem"
+# Wait for Auth public key up to 60s
+KEY_PATH="/shared/keys/auth_public.pem"
 for i in $(seq 1 60); do
-  if [ -f "$AUTH_PUB" ]; then break; fi
+  if [ -f "$KEY_PATH" ]; then break; fi
+  echo "Waiting for public key at $KEY_PATH... ($i/60)"
   sleep 1
 done
-if [ -z "${AUTH_PUBLIC_KEY}" ] && [ -f "$AUTH_PUB" ]; then
-  export AUTH_PUBLIC_KEY="$(awk 'NF {sub(/\r/, ""); printf "%s\\n", $0; }' "$AUTH_PUB")"
+if [ -z "${AUTH_PUBLIC_KEY}" ] && [ -f "$KEY_PATH" ]; then
+  export AUTH_PUBLIC_KEY="$(awk 'NF {sub(/\r/, ""); printf "%s\\n", $0; }' "$KEY_PATH")"
 fi
-node -r ts-node/register -r dotenv/config ./node_modules/moleculer/bin/moleculer-runner.js --config moleculer.config.ts src/**/*.service.ts
+node ./node_modules/moleculer/bin/moleculer-runner.js --config dist/moleculer.config.js dist/**/*.service.js
 EOF
 RUN chmod +x /entrypoint.sh
 CMD ["/entrypoint.sh"]

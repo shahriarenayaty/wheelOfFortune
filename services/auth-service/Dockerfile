@@ -13,7 +13,7 @@ RUN npm run build
 
 
 
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 
 FROM node:${NODE_VERSION}-alpine AS runtime
 WORKDIR /app
